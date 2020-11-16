@@ -13,7 +13,7 @@ var All = []*cli.Command{
 		Name:  "version",
 		Usage: "Version Information",
 		Action: func(c *cli.Context) error {
-			_, err := os.Stdout.WriteString("GopenPGP v2.0.1\n")
+			_, err := os.Stdout.WriteString("GopenPGP v2.1.1\n")
 			return err
 		},
 	},

@@ -40,7 +40,7 @@ make test
 Invoke `gosop` followed by subcommands
 ```
 $ gosop version
-GopenPGP v2.0.1
+GopenPGP v2.1.1
 ```
 
 See [commands directory](https://github.com/ProtonMail/gosop/tree/master/cmd)
