@@ -98,7 +98,7 @@ func passwordDecrypt(input []byte) error {
 	if err != nil {
 		return decErr(err)
 	}
-	_, err = os.Stdout.WriteString(plaintext + "\n")
+	_, err = os.Stdout.WriteString(plaintext)
 	return err
 }
 
