@@ -13,7 +13,6 @@ import (
 
 	"github.com/ProtonMail/gopenpgp/v2/constants"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
@@ -56,9 +55,15 @@ func Decrypt(keyFilenames ...string) error {
 		return decErr(err)
 	}
 
-	err = handleSessionKeys(split.GetBinaryKeyPacket(), privKeyRing)
+	sk, err := privKeyRing.DecryptSessionKey(split.GetBinaryKeyPacket())
 	if err != nil {
 		return decErr(err)
+	}
+	if sessionKeyOut != "" {
+		err := writeSessionKeyToFile(sk)
+		if err != nil {
+			return decErr(err)
+		}
 	}
 	if sessionKey != "" {
 		return sessionKeyDecrypt(split.GetBinaryDataPacket())
@@ -100,11 +105,25 @@ func passwordDecrypt(input []byte) error {
 		return err
 	}
 	pw = []byte(strings.TrimSpace(string(pw)))
-	plaintext, err := helper.DecryptMessageWithPassword(pw, string(input))
+	message, err := crypto.NewPGPMessageFromArmored(string(input))
 	if err != nil {
 		return decErr(err)
 	}
-	_, err = os.Stdout.WriteString(plaintext)
+	sk, err := crypto.DecryptSessionKeyWithPassword(message.GetBinary(), pw)
+	if err != nil {
+		return decErr(err)
+	}
+	if sessionKeyOut != "" {
+		err := writeSessionKeyToFile(sk)
+		if err != nil {
+			return decErr(err)
+		}
+	}
+	decrypted, err := crypto.DecryptMessageWithPassword(message, pw)
+	if err != nil {
+		return decErr(err)
+	}
+	_, err = os.Stdout.WriteString(decrypted.GetString())
 	return err
 }
 
@@ -143,11 +162,7 @@ func sessionKeyDecrypt(dataBytes []byte) error {
 	return err
 }
 
-func writeSessionKeyToFile(privKeyRing *crypto.KeyRing, keyBytes []byte) error {
-	rawSK, err := privKeyRing.DecryptSessionKey(keyBytes)
-	if err != nil {
-		return decErr(err)
-	}
+func writeSessionKeyToFile(sk *crypto.SessionKey) error {
 	var sessionKeyFile *os.File
 	if sessionKeyOut[0:4] == "@FD:" {
 		fd, err := strconv.ParseUint(sessionKeyOut[4:], 10, strconv.IntSize)
@@ -156,17 +171,18 @@ func writeSessionKeyToFile(privKeyRing *crypto.KeyRing, keyBytes []byte) error {
 		}
 		sessionKeyFile = os.NewFile(uintptr(fd), sessionKeyOut)
 	} else {
+		var err error
 		sessionKeyFile, err = os.Create(sessionKeyOut)
 		if err != nil {
 			return err
 		}
 	}
-	cipherFunc, err := rawSK.GetCipherFunc()
+	cipherFunc, err := sk.GetCipherFunc()
 	if err != nil {
 		return decErr(err)
 	}
 	formattedSessionKey := strconv.FormatUint(uint64(cipherFunc), 10) + ":" +
-		strings.ToUpper(hex.EncodeToString(rawSK.Key))
+		strings.ToUpper(hex.EncodeToString(sk.Key))
 	if _, err = sessionKeyFile.Write([]byte(formattedSessionKey)); err != nil {
 		return decErr(err)
 	}
@@ -191,17 +207,6 @@ func writeVerificationToFile(pubKeyRing *crypto.KeyRing) error {
 	}
 	if err = outputVerFile.Close(); err != nil {
 		return decErr(err)
-	}
-	return nil
-}
-
-func handleSessionKeys(keyBytes []byte, privKR *crypto.KeyRing) error {
-	// Create split message to work with session keys if flags are given
-	if sessionKeyOut != "" {
-		err := writeSessionKeyToFile(privKR, keyBytes)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }
