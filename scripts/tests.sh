@@ -5,7 +5,7 @@ if [ $# != 3 ] || [ $2 != '-v' ]; then
     exit 1
 fi
 
-sop=gosop
+sop=$1
 which $sop
 if [ $? != 0 ]; then
     echo "gosop not found."; echo
