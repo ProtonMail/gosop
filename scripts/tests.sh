@@ -1,13 +1,13 @@
 #!/bin/bash
 
-if (( $# != 3 || $2 != '-v' )); then
+if [ $# != 3 ] || [ $2 != '-v' ]; then
     echo "Usage: test.sh sop.binary -v <int verbosity>"
     exit 1
 fi
 
 sop=gosop
 which $sop
-if (( $? != 0 )); then
+if [ $? != 0 ]; then
     echo "gosop not found."; echo
     echo "Did you run go install? Is \$GOPATH/bin in your \$PATH?"
     echo "... else, you can set sop=/path/to/gosop/binary in scripts/tests.sh"; echo
@@ -19,7 +19,7 @@ verbosity=$3
 # tmp directory, erased on exit
 create_tmp_dir() {
     eval $1="$(mktemp -d)"
-    if (( $? != 0 )); then
+    if [ $? != 0 ]; then
         echo "Failed to create temporary directory"
         exit $?
     fi
@@ -27,7 +27,7 @@ create_tmp_dir() {
 
 erase_tmp_dir() {
     rm -rf $1
-    if (( $? != 0 )); then
+    if [ $? != 0 ]; then
         echo "Failed to delete temporary directory: $1"
         exit $?
     fi
@@ -35,12 +35,12 @@ erase_tmp_dir() {
 
 
 check_exit_code() {
-    if (( $1 == 69 || $1 == 37 )); then
+    if [ $1 == 69 ] || [ $1 == 37 ]; then
         printf "    ... SKIPPED \n"
         return 0
     fi
 
-    if (( $1 != $2 )); then
+    if [ $1 != $2 ]; then
         echo "Failed: Exit code $1, expected $2"
         exit $1
     fi
@@ -52,10 +52,10 @@ comm() {
 }
 
 my_cat() {
-    if (( $verbosity == 1 )); then
+    if [ $verbosity == 1 ]; then
         head -n1 $1
     fi
-    if (( $verbosity == 2 )); then
+    if [ $verbosity == 2 ]; then
         cat $1
     fi
 }
