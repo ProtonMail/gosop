@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"golang.org/x/crypto/openpgp/packet"
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
 
 // ArmorComm takes unarmored OpenPGP material from Std input and outputs the

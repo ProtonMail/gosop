@@ -9,7 +9,7 @@ import (
 )
 
 // GenerateKey creates a single default OpenPGP certificate with zero or more
-// User IDs. Given that x/crypto expects name, comment, email parameters, we
+// User IDs. Given that go-crypto expects name, comment, email parameters, we
 // force the USERID of this implementation to be of the form "name (comment)
 // <email>", and we use strictly 1 USERID per generated key.
 func GenerateKey(userIDs ...string) error {
