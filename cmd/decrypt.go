@@ -2,8 +2,10 @@ package cmd
 
 import (
 	"encoding/hex"
+	"errors"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -12,6 +14,8 @@ import (
 	"github.com/ProtonMail/gopenpgp/v2/constants"
 	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/ProtonMail/gopenpgp/v2/helper"
+
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
 
 // Decrypt takes the data from stdin and decrypts it with the key file passed as
@@ -104,12 +108,33 @@ func passwordDecrypt(input []byte) error {
 	return err
 }
 
+var symKeyAlgos = map[packet.CipherFunction]string{
+	packet.Cipher3DES:   constants.ThreeDES,
+	packet.CipherCAST5:  constants.CAST5,
+	packet.CipherAES128: constants.AES128,
+	packet.CipherAES192: constants.AES192,
+	packet.CipherAES256: constants.AES256,
+}
+
 func sessionKeyDecrypt(dataBytes []byte) error {
-	token, err := utils.ReadFileOrEnv(sessionKey)
+	formattedSessionKey, err := utils.ReadFileOrEnv(sessionKey)
 	if err != nil {
 		return err
 	}
-	sessionKey := crypto.NewSessionKeyFromToken(token, constants.AES256)
+	parts := strings.Split(string(formattedSessionKey), ":")
+	sessionKeyAlgo, err := strconv.ParseUint(parts[0], 10, 8)
+	if err != nil {
+		return err
+	}
+	sessionKeyAlgoName, ok := symKeyAlgos[packet.CipherFunction(sessionKeyAlgo)]
+	if !ok {
+		return errors.New("unsupported session key algorithm")
+	}
+	sessionKeyBytes, err := hex.DecodeString(parts[1])
+	if err != nil {
+		return err
+	}
+	sessionKey := crypto.NewSessionKeyFromToken(sessionKeyBytes, sessionKeyAlgoName)
 	plaintext, err := sessionKey.Decrypt(dataBytes)
 	if err != nil {
 		return err
@@ -127,7 +152,13 @@ func writeSessionKeyToFile(privKeyRing *crypto.KeyRing, keyBytes []byte) error {
 	if err != nil {
 		return decErr(err)
 	}
-	if _, err = sessionKeyFile.Write(rawSK.Key); err != nil {
+	cipherFunc, err := rawSK.GetCipherFunc()
+	if err != nil {
+		return decErr(err)
+	}
+	formattedSessionKey := strconv.FormatUint(uint64(cipherFunc), 10) + ":" +
+		strings.ToUpper(hex.EncodeToString(rawSK.Key))
+	if _, err = sessionKeyFile.Write([]byte(formattedSessionKey)); err != nil {
 		return decErr(err)
 	}
 	if err = sessionKeyFile.Close(); err != nil {
