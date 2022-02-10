@@ -65,6 +65,7 @@ trap "erase_tmp_dir $data" EXIT
 
 # Test files
 message=$data/message.txt
+password=$data/password.txt
 alice_secret=$data/alice.sec
 bob_secret=$data/bob.sec
 alice_public=$data/alice.asc
@@ -110,6 +111,7 @@ $sop extract-cert --no-armor < $bob_secret > $bob_public_unarmored
 check_exit_code $? 0
 
 printf "\nOír la noche inmensa, más inmensa sin ella.\nY el verso cae al alma como al pasto el rocío.\n" > $message
+printf "test.123" > $password
 
 comm "sign"
 $sop sign --as=text $alice_secret < $message > $encrypted
@@ -137,12 +139,12 @@ check_exit_code $? 3
 my_cat $verification_too_young
 
 comm "encrypt --with-password"
-$sop encrypt --with-password=test.123 < $message > $encrypted_with_password
+$sop encrypt --with-password=$password < $message > $encrypted_with_password
 check_exit_code $? 0
 my_cat $encrypted_with_password
 
 comm "decrypt --with-password"
-$sop decrypt --with-password=test.123 < $encrypted_with_password > $decrypted_with_password
+$sop decrypt --with-password=$password < $encrypted_with_password > $decrypted_with_password
 check_exit_code $? 0
 my_cat $decrypted_with_password
 

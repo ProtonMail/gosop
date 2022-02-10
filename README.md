@@ -25,7 +25,11 @@ go install
 
 You can now invoke `gosop` from your command line:
 ```
-echo "Hello PGP" | gosop encrypt --with-password="strong_password"
+echo "Hello PGP" | gosop encrypt --with-password=PASSWORD_FILE
+```
+or:
+```
+echo "Hello PGP" | PWD="password" gosop encrypt --with-password="@ENV:PWD"
 ```
 ### Test your installation
 Given the CLI nature of `gosop`, tests are run with `bash` scripts

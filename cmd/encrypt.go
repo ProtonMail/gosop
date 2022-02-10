@@ -33,7 +33,11 @@ func Encrypt(keyFilenames ...string) error {
 	// Password encrypt
 	var pgpMessage *crypto.PGPMessage
 	if password != "" {
-		pw := []byte(strings.TrimSpace(password))
+		pw, err := utils.ReadFileOrEnv(password)
+		if err != nil {
+			return err
+		}
+		pw = []byte(strings.TrimSpace(string(pw)))
 		ciphertext, err := helper.EncryptMessageWithPassword(pw, string(plaintextBytes))
 		if err != nil {
 			return encErr(err)

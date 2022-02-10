@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -108,22 +109,14 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		return keyRing, err
 	}
 	for _, filename := range keyFilenames {
-		var keyReader *os.File
-		keyReader, err = os.Open(filename)
+		keyData, err := ReadFileOrEnv(filename)
 		if err != nil {
 			return keyRing, err
 		}
 		var key *crypto.Key
-		key, err = crypto.NewKeyFromArmoredReader(keyReader)
+		key, err = crypto.NewKeyFromArmored(string(keyData))
 		if err != nil {
 			// Try unarmored
-			// TODO: Use NewKeyFromReader instead. But see
-			// https://gitlab.protontech.ch/crypto/internal-issues/issues/3
-			var keyData []byte
-			keyData, err = ioutil.ReadFile(filename)
-			if err != nil {
-				return nil, err
-			}
 			key, err = crypto.NewKey(keyData)
 			if err != nil {
 				return nil, err
@@ -135,10 +128,20 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		if err = keyRing.AddKey(key); err != nil {
 			return nil, err
 		}
-
-		if err = keyReader.Close(); err != nil {
-			return nil, err
-		}
 	}
 	return keyRing, err
+}
+
+func ReadFileOrEnv(filename string) ([]byte, error) {
+	if filename[0:5] == "@ENV:" {
+		return []byte(os.Getenv(filename[5:])), nil
+	}
+	if filename[0:4] == "@FD:" {
+		fd, err := strconv.ParseUint(filename[4:], 10, strconv.IntSize)
+		if err != nil {
+			return nil, err
+		}
+		return ioutil.ReadAll(os.NewFile(uintptr(fd), filename))
+	}
+	return ioutil.ReadFile(filename)
 }

@@ -14,10 +14,9 @@ import (
 	"github.com/ProtonMail/gopenpgp/v2/helper"
 )
 
-// Decrypt takes the data from stdin and decrypts it with the keys passed as
-// argument, or a passphrase passed with the --with-password flag.
+// Decrypt takes the data from stdin and decrypts it with the key file passed as
+// argument, or a passphrase in a file passed with the --with-password flag.
 // Note: Can't encrypt both symmetrically (passphrase) and keys.
-// FIXME: --with-password="" does not work
 // TODO: Multiple signers?
 //
 // --session-key-out=file flag: Outputs session key byte stream to given file.
@@ -92,8 +91,11 @@ func decErr(err error) error {
 }
 
 func passwordDecrypt(input []byte) error {
-	pass := strings.TrimSpace(password)
-	pw := []byte(pass)
+	pw, err := utils.ReadFileOrEnv(password)
+	if err != nil {
+		return err
+	}
+	pw = []byte(strings.TrimSpace(string(pw)))
 	plaintext, err := helper.DecryptMessageWithPassword(pw, string(input))
 	if err != nil {
 		return decErr(err)
@@ -103,11 +105,7 @@ func passwordDecrypt(input []byte) error {
 }
 
 func sessionKeyDecrypt(dataBytes []byte) error {
-	skFile, err := os.Open(sessionKey)
-	if err != nil {
-		return err
-	}
-	token, err := ioutil.ReadAll(skFile)
+	token, err := utils.ReadFileOrEnv(sessionKey)
 	if err != nil {
 		return err
 	}
