@@ -148,9 +148,18 @@ func writeSessionKeyToFile(privKeyRing *crypto.KeyRing, keyBytes []byte) error {
 	if err != nil {
 		return decErr(err)
 	}
-	sessionKeyFile, err := os.Create(sessionKeyOut)
-	if err != nil {
-		return decErr(err)
+	var sessionKeyFile *os.File
+	if sessionKeyOut[0:4] == "@FD:" {
+		fd, err := strconv.ParseUint(sessionKeyOut[4:], 10, strconv.IntSize)
+		if err != nil {
+			return err
+		}
+		sessionKeyFile = os.NewFile(uintptr(fd), sessionKeyOut)
+	} else {
+		sessionKeyFile, err = os.Create(sessionKeyOut)
+		if err != nil {
+			return err
+		}
 	}
 	cipherFunc, err := rawSK.GetCipherFunc()
 	if err != nil {
