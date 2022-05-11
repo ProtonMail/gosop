@@ -4,6 +4,8 @@ package cmd
 import (
 	"os"
 
+	"github.com/ProtonMail/gopenpgp/v2/constants"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,7 +15,7 @@ var All = []*cli.Command{
 		Name:  "version",
 		Usage: "Version Information",
 		Action: func(c *cli.Context) error {
-			_, err := os.Stdout.WriteString("GopenPGP v2.1.1\n")
+			_, err := os.Stdout.WriteString("GopenPGP " + constants.Version + "\n")
 			return err
 		},
 	},
