@@ -23,7 +23,8 @@ git clone git@github.com:ProtonMail/gosop.git && cd gosop
 go install
 ```
 
-You can now invoke `gosop` from your command line:
+### Usage
+You can now invoke `gosop` from the command line:
 ```
 echo "Hello PGP" | gosop encrypt --with-password=PASSWORD_FILE
 ```
@@ -31,6 +32,10 @@ or:
 ```
 echo "Hello PGP" | PWD="password" gosop encrypt --with-password="@ENV:PWD"
 ```
+
+See [commands directory](https://github.com/ProtonMail/gosop/tree/master/cmd)
+for all currently supported subcommands and flags, or run `gosop help`.
+
 ### Test your installation
 Given the CLI nature of `gosop`, tests are run with `bash` scripts
 outside the Go testing framework.
@@ -38,17 +43,6 @@ outside the Go testing framework.
 cd $GOPATH/src/github.com/ProtonMail/gosop
 make test
 ```
-
-### Usage
-
-Invoke `gosop` followed by subcommands
-```
-$ gosop version
-GopenPGP v2.1.1
-```
-
-See [commands directory](https://github.com/ProtonMail/gosop/tree/master/cmd)
-for all currently supported subcommands and flags, or run `gosop help`.
 
 ### Contribute
 If you are providing new commands or flags according to the
