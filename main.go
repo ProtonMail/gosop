@@ -13,6 +13,7 @@ func main() {
 	app := &cli.App{
 		Name:  "gosop",
 		Usage: "Stateless OpenPGP implementation for GopenPGP",
+		Version: cmd.VERSION,
 		Authors: []*cli.Author{
 			&cli.Author{
 				Name: "Proton Technologies AG",

@@ -4,6 +4,8 @@ import "github.com/urfave/cli/v2"
 
 // Variables defined by flags
 var (
+	backend       bool
+	extended      bool
 	noArmor       bool
 	asType        string
 	notBefore     string
@@ -19,6 +21,16 @@ var (
 
 // All possible flags for commands
 var (
+	backendFlag = &cli.BoolFlag{
+		Name:        "backend",
+		Value:       false,
+		Destination: &backend,
+	}
+	extendedFlag = &cli.BoolFlag{
+		Name:        "extended",
+		Value:       false,
+		Destination: &extended,
+	}
 	noArmorFlag = &cli.BoolFlag{
 		Name:        "no-armor",
 		Value:       false,
