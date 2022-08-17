@@ -20,7 +20,12 @@ func main() {
 		},
 		Commands: cmd.All,
 		Action: func(c *cli.Context) error {
-			return nil
+			if c.Args().Len() > 0 {
+				return cmd.Err69
+			} else {
+				cli.ShowAppHelpAndExit(c, 1)
+				return nil
+			}
 		},
 	}
 
