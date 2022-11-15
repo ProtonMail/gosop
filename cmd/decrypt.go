@@ -100,7 +100,7 @@ func parseSessionKey() (*crypto.SessionKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	parts := strings.Split(string(formattedSessionKey), ":")
+	parts := strings.Split(strings.TrimSpace(string(formattedSessionKey)), ":")
 	skAlgo, err := strconv.ParseUint(parts[0], 10, 8)
 	if err != nil {
 		return nil, err
