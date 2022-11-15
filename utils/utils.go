@@ -89,8 +89,7 @@ func ParseDates(notBefore, notAfter string) (nb, na time.Time, err error) {
 
 // VerificationString gives the line containing the result of a verification.
 func VerificationString(timestamp time.Time, fgp, primFgp []byte) string {
-	layouts := []string{layout, layoutSecondary}
-	formattedTime := timestamp.Format(layouts[1])
+	formattedTime := timestamp.UTC().Format(layout)
 	return fmt.Sprintf("%v %X %X", formattedTime, fgp, primFgp)
 }
 
