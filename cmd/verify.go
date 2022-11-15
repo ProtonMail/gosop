@@ -53,7 +53,8 @@ func Verify(input ...string) error {
 		signature = crypto.NewPGPSignature(sigBytes)
 	}
 
-	if err = keyRing.VerifyDetached(message, signature, 0); err != nil {
+	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, 0)
+	if err != nil {
 		return Err3
 	}
 
@@ -62,7 +63,7 @@ func Verify(input ...string) error {
 	if err != nil {
 		return verErr(err)
 	}
-	ver := utils.VerificationString(time.Now(), fgp, fgp)
+	ver := utils.VerificationString(time.Unix(creationTime, 0), fgp, fgp)
 	_, err = os.Stdout.WriteString(ver + "\n")
 
 	return err
