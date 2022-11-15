@@ -43,15 +43,8 @@ func Verify(input ...string) error {
 	message := &crypto.PlainMessage{Data: plaintextBytes, TextType: text}
 
 	// Collect signature
-	sigFile, err := os.Open(input[0])
+	sigBytes, err := utils.ReadFileOrEnv(input[0])
 	if err != nil {
-		return verErr(err)
-	}
-	sigBytes, err := ioutil.ReadAll(sigFile)
-	if err != nil {
-		return verErr(err)
-	}
-	if err = sigFile.Close(); err != nil {
 		return verErr(err)
 	}
 	var signature *crypto.PGPSignature
