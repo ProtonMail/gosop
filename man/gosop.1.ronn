@@ -12,47 +12,36 @@ Proton Technologies AG
 ## COMMANDS
 
 * `armor`:
-
 Add ASCII Armor
 
 * `dearmor`:
-
 Remove ASCII Armor
 
 * `decrypt`:
-
 Decrypt a Message
 
 * `encrypt`:
-
 Encrypt a Message
 
 * `extract-cert`:
-
 Extract a Certificate from a Secret Key
 
 * `generate-key`:
-
 Generate a Secret Key
 
 * `sign`:
-
 Create a Detached Signature
 
 * `verify`:
-
 Verify a Detached Signature
 
 * `version`:
-
 Version Information
 
 * `help`, `h`:
-
 Shows a list of commands or help for one command
 
 ## GLOBAL OPTIONS
 
 * `--help`, `-h`:
-
 Show help (default: false)
