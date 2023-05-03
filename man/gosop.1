@@ -1,6 +1,6 @@
 .\" generated with Ronn-NG/v0.9.1
 .\" http://github.com/apjanke/ronn-ng/tree/0.9.1
-.TH "GOSOP" "1" "November 2022" ""
+.TH "GOSOP" "1" "May 2023" ""
 .SH "NAME"
 \fBgosop\fR \- Stateless OpenPGP implementation for GopenPGP
 .SH "USAGE:"
@@ -11,35 +11,163 @@ Proton Technologies AG
 .TP
 \fBarmor\fR
 Add ASCII Armor
+.IP
+USAGE:
+.br
+gosop armor [command options] < DATA
+.IP
+OPTIONS:
+.br
+\fB\-\-label\fR \fIvalue\fR
+.br
+\fB\-\-label\fR={\fIauto\fR|\fIsig\fR|\fIkey\fR|\fIcert\fR|\fImessage\fR} (default: \fIauto\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBdearmor\fR
 Remove ASCII Armor
+.IP
+USAGE:
+.br
+gosop dearmor < DATA
+.IP
+OPTIONS:
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBdecrypt\fR
 Decrypt a Message
+.IP
+USAGE:
+.IP
+gosop decrypt [command options] [KEY\|\.\|\.\|\.] < CIPHERTEXT
+.IP
+OPTIONS:
+.br
+\fB\-\-session\-key\-out\fR \fIvalue\fR
+.br
+\fB\-\-session\-key\-out\fR=\fISESSIONKEY\fR
+.br
+\fB\-\-with\-session\-key\fR \fIvalue\fR
+.br
+\fB\-\-with\-session\-key\fR=\fISESSIONKEY\fR
+.br
+\fB\-\-with\-password\fR \fIvalue\fR
+.br
+\fB\-\-with\-password\fR=\fIPASSWORD\fR
+.br
+\fB\-\-verify\-out\fR \fIvalue\fR
+.br
+\fB\-\-verify\-out\fR=\fIVERIFICATIONS\fR
+.br
+\fB\-\-verify\-with\fR \fIvalue\fR
+.br
+\fB\-\-verify\-out\fR=\fICERTS\fR
+.br
+\fB\-\-verify\-not\-before\fR \fIvalue\fR
+.br
+\fB\-\-verify\-not\-before\fR={\fI\-\fR|\fIDATE\fR} (default: \fI\-\fR)
+.br
+\fB\-\-verify\-not\-after\fR \fIvalue\fR
+.br
+\fB\-\-verify\-not\-after\fR={\fI\-\fR|\fIDATE\fR} (default: \fInow\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBencrypt\fR
 Encrypt a Message
+.IP
+USAGE:
+.br
+gosop encrypt [command options] [CERTS\|\.\|\.\|\.] < DATA
+.IP
+OPTIONS:
+.br
+\fB\-\-as\fR \fIvalue\fR
+.br
+\fB\-\-as\fR={\fIbinary\fR|\fItext\fR} (default: \fIbinary\fR)
+.br
+\fB\-\-no\-armor\fR (default: \fIfalse\fR)
+.br
+\fB\-\-with\-password\fR \fIvalue\fR
+.br
+\fB\-\-with\-password\fR=\fIPASSWORD\fR
+.br
+\fB\-\-sign\-with\fR \fIvalue\fR
+.br
+\fB\-\-sign\-with\fR=\fIKEY\fR
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBextract\-cert\fR
 Extract a Certificate from a Secret Key
+.IP
+USAGE:
+.br
+gosop extract\-cert [command options]
+.IP
+OPTIONS:
+.br
+\fB\-\-no\-armor\fR (default: \fIfalse\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBgenerate\-key\fR
 Generate a Secret Key
+.IP
+USAGE:
+.br
+\fB\-\-no\-armor\fR (default: \fIfalse\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBsign\fR
 Create a Detached Signature
+.IP
+USAGE:
+.br
+gosop extract\-cert [command options]
+.IP
+OPTIONS:
+.br
+\fB\-\-no\-armor\fR (default: \fIfalse\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBverify\fR
 Verify a Detached Signature
+.IP
+USAGE:
+.br
+gosop verify SIGNATURE CERTS [CERTS\|\.\|\.\|\.] < DATA
+.IP
+OPTIONS:
+.br
+\fB\-\-not\-before\fR \fIvalue\fR
+.br
+\fB\-\-not\-before\fR={\fI\-\fR|\fIDATE\fR} (default: \fI\-\fR)
+.br
+\fB\-\-not\-after\fR \fIvalue\fR
+.br
+\fB\-\-not\-after\fR={\fI\-\fR|\fIDATE\fR} (default: \fInow\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBversion\fR
 Version Information
+.IP
+USAGE:
+.br
+gosop version [command options] [arguments\|\.\|\.\|\.]
+.IP
+OPTIONS:
+.br
+\fB\-\-backend\fR (default: \fIfalse\fR)
+.br
+\fB\-\-extended\fR (default: \fIfalse\fR)
+.br
+\fB\-\-help\fR, \fB\-h\fR: show help (default: \fIfalse\fR)
 .TP
 \fBhelp\fR, \fBh\fR
 Shows a list of commands or help for one command
-.SH "GLOBAL OPTIONS"
-.TP
-\fB\-\-help\fR, \fB\-h\fR
-Show help (default: false)
 
