@@ -85,6 +85,9 @@ Extract a Certificate from a Secret Key
 Generate a Secret Key
 
     USAGE:     
+    gosop generate-key [command options] [USERID...
+
+    OPTIONS:    
     **--no-armor** (default: <false>)    
     **--help**, **-h**: show help (default: <false>)    
 
