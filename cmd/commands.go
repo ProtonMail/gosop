@@ -21,7 +21,7 @@ var All = []*cli.Command{
 	{
 		Name:      "generate-key",
 		Usage:     "Generate a Secret Key",
-		UsageText: "sop-go generate-key [command options] [USERID...]",
+		UsageText: "gosop generate-key [command options] [USERID...]",
 		Flags: []cli.Flag{
 			noArmorFlag,
 		},
@@ -32,7 +32,7 @@ var All = []*cli.Command{
 	{
 		Name:      "extract-cert",
 		Usage:     "Extract a Certificate from a Secret Key",
-		UsageText: "sop-go extract-cert [command options]",
+		UsageText: "gosop extract-cert [command options]",
 		Flags: []cli.Flag{
 			noArmorFlag,
 		},
@@ -43,7 +43,7 @@ var All = []*cli.Command{
 	{
 		Name:      "sign",
 		Usage:     "Create a Detached Signature",
-		UsageText: "sop-go sign [command options] KEY [KEY...] < DATA",
+		UsageText: "gosop sign [command options] KEY [KEY...] < DATA",
 		Flags: []cli.Flag{
 			noArmorFlag,
 			asFlag,
@@ -55,7 +55,7 @@ var All = []*cli.Command{
 	{
 		Name:      "verify",
 		Usage:     "Verify a Detached Signature",
-		UsageText: "sop-go verify SIGNATURE CERTS [CERTS...] < DATA",
+		UsageText: "gosop verify SIGNATURE CERTS [CERTS...] < DATA",
 		Flags: []cli.Flag{
 			notBeforeFlag,
 			notAfterFlag,
@@ -67,7 +67,7 @@ var All = []*cli.Command{
 	{
 		Name:      "encrypt",
 		Usage:     "Encrypt a Message",
-		UsageText: "sop-go encrypt [command options] [CERTS...] < DATA",
+		UsageText: "gosop encrypt [command options] [CERTS...] < DATA",
 		Flags: []cli.Flag{
 			asFlag,
 			noArmorFlag,
@@ -81,7 +81,7 @@ var All = []*cli.Command{
 	{
 		Name:      "decrypt",
 		Usage:     "Decrypt a Message",
-		UsageText: "sop-go decrypt [command options] [KEY...] < CIPHERTEXT",
+		UsageText: "gosop decrypt [command options] [KEY...] < CIPHERTEXT",
 		Flags: []cli.Flag{
 			sessionKeyOutFlag,
 			sessionKeyFlag,
@@ -98,7 +98,7 @@ var All = []*cli.Command{
 	{
 		Name:      "armor",
 		Usage:     "Add ASCII Armor",
-		UsageText: "sop-go armor [command options] < DATA",
+		UsageText: "gosop armor [command options] < DATA",
 		Flags: []cli.Flag{
 			labelFlag,
 		},
@@ -109,7 +109,7 @@ var All = []*cli.Command{
 	{
 		Name:      "dearmor",
 		Usage:     "Remove ASCII Armor",
-		UsageText: "sop-go dearmor < DATA",
+		UsageText: "gosop dearmor < DATA",
 		Action: func(c *cli.Context) error {
 			return DearmorComm()
 		},

@@ -6,13 +6,13 @@ import (
 
 // Error codes as defined in the draft, section 6.
 var (
-	Err3  = cli.Exit("Code 3: No acceptable signatures found (\"sop-go verify\")", 3)
-	Err13 = cli.Exit("Code 13: Asymmetric algorithm unsupported (\"sop-go encrypt\")", 13)
-	Err17 = cli.Exit("Code 17: Certificate not encryption-capable (\"sop-go encrypt\")", 17)
+	Err3  = cli.Exit("Code 3: No acceptable signatures found (\"gosop verify\")", 3)
+	Err13 = cli.Exit("Code 13: Asymmetric algorithm unsupported (\"gosop encrypt\")", 13)
+	Err17 = cli.Exit("Code 17: Certificate not encryption-capable (\"gosop encrypt\")", 17)
 	Err19 = cli.Exit("Missing required argument", 19)
-	Err23 = cli.Exit("Incomplete verification instructions (\"sop-go decrypt\")", 23)
-	Err29 = cli.Exit("Unable to decrypt (\"sop-go decrypt\")", 29)
-	Err31 = cli.Exit("Non-\"UTF-8\" password (\"sop-go encrypt\")", 31)
+	Err23 = cli.Exit("Incomplete verification instructions (\"gosop decrypt\")", 23)
+	Err29 = cli.Exit("Unable to decrypt (\"gosop decrypt\")", 29)
+	Err31 = cli.Exit("Non-\"UTF-8\" password (\"gosop encrypt\")", 31)
 	Err37 = cli.Exit("Unsupported option", 37)
 	Err41 = cli.Exit("Invalid data type (no secret key where \"KEY\" expected, etc)", 41)
 	Err53 = cli.Exit("Non-text input where text expected", 53)
