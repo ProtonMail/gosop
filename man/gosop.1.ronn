@@ -1,0 +1,137 @@
+gosop(1) -- Stateless OpenPGP implementation for GopenPGP
+===
+
+## USAGE:
+
+gosop \[global options\] command [command options] [arguments...]
+
+## AUTHOR:
+
+Proton Technologies AG
+
+## COMMANDS
+
+* `armor`:
+Add ASCII Armor    
+
+    USAGE:    
+    gosop armor [command options] < DATA    
+
+    OPTIONS:    
+    **--label** <value>    
+    **--label**={<auto>|<sig>|<key>|<cert>|<message>} (default: <auto>)     
+    **--help**, **-h**: show help (default: <false>)
+
+* `dearmor`:
+Remove ASCII Armor
+
+    USAGE:    
+    gosop dearmor < DATA    
+
+    OPTIONS:    
+    **--help**, **-h**: show help (default: <false>)
+
+* `decrypt`:
+Decrypt a Message
+
+    USAGE:
+
+    gosop decrypt [command options] [KEY...] < CIPHERTEXT
+
+    OPTIONS:    
+    **--session-key-out** <value>    
+    **--session-key-out**=<SESSIONKEY>    
+    **--with-session-key** <value>    
+    **--with-session-key**=<SESSIONKEY>    
+    **--with-password** <value>    
+    **--with-password**=<PASSWORD>    
+    **--verify-out** <value>    
+    **--verify-out**=<VERIFICATIONS>    
+    **--verify-with** <value>    
+    **--verify-out**=<CERTS>    
+    **--verify-not-before** <value>    
+    **--verify-not-before**={<->|<DATE>} (default: <->)    
+    **--verify-not-after** <value>    
+    **--verify-not-after**={<->|<DATE>} (default: <now>)    
+    **--help**, **-h**: show help (default: <false>)    
+
+* `encrypt`:
+Encrypt a Message
+
+    USAGE:    
+    gosop encrypt [command options] [CERTS...] < DATA
+
+    OPTIONS:   
+    **--as** <value>    
+    **--as**={<binary>|<text>} (default: <binary>)    
+    **--no-armor** (default: <false>)    
+    **--with-password** <value>    
+    **--with-password**=<PASSWORD>    
+    **--sign-with** <value>    
+    **--sign-with**=<KEY>    
+    **--help**, **-h**: show help (default: <false>)    
+
+* `extract-cert`:
+Extract a Certificate from a Secret Key
+
+    USAGE:    
+    gosop extract-cert [command options]
+
+    OPTIONS:     
+    **--no-armor** (default: <false>)     
+    **--help**, **-h**: show help (default: <false>)    
+
+* `generate-key`:
+Generate a Secret Key
+
+    USAGE:     
+    gosop generate-key [command options] [USERID...
+
+    OPTIONS:    
+    **--no-armor** (default: <false>)    
+    **--help**, **-h**: show help (default: <false>)    
+
+* `sign`:
+Create a Detached Signature
+
+    USAGE:     
+    gosop extract-cert [command options]
+
+    OPTIONS:    
+    **--no-armor** (default: <false>)    
+    **--help**, **-h**: show help (default: <false>)    
+
+* `verify`:
+Verify a Detached Signature
+
+    USAGE:    
+    gosop verify SIGNATURE CERTS [CERTS...] < DATA
+
+    OPTIONS:    
+    **--not-before** <value>    
+    **--not-before**={<->|<DATE>} (default: <->)     
+    **--not-after** <value>     
+    **--not-after**={<->|<DATE>} (default: <now>)    
+    **--help**, **-h**: show help (default: <false>)    
+
+* `version`:
+Version Information
+
+   USAGE:     
+   gosop version [command options] [arguments...]
+
+   OPTIONS:    
+   **--backend** (default: <false>)    
+   **--extended** (default: <false>)     
+   **--help**, **-h**: show help (default: <false>)    
+
+* `help`, `h`:
+Shows a list of commands or help for one command
+
+## GLOBAL OPTIONS:
+
+* `--help`, `-h`:
+show help (default: <false>)     
+
+* `--version`, `-v`:
+print the version (default: <false>)
