@@ -105,10 +105,15 @@ func parseSessionKey() (*crypto.SessionKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	skAlgoName, ok := symKeyAlgos[packet.CipherFunction(skAlgo)]
-	if !ok {
-		return nil, errors.New("unsupported session key algorithm")
+	skAlgoName := ""
+	if skAlgo != 0 {
+		var ok bool
+		skAlgoName, ok = symKeyAlgos[packet.CipherFunction(skAlgo)]
+		if !ok {
+			return nil, errors.New("unsupported session key algorithm")
+		}
 	}
+
 	skBytes, err := hex.DecodeString(parts[1])
 	if err != nil {
 		return nil, err

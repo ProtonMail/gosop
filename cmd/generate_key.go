@@ -23,8 +23,8 @@ func GenerateKey(userIDs ...string) error {
 		}
 	}
 
-	// Generate RSA key
-	rsaKey, err := crypto.GenerateKey(name, email, "rsa", 2048)
+	// Generate x25519 key
+	rsaKey, err := crypto.GenerateKey(name, email, "x25519", 256)
 	if err != nil {
 		return kgErr(err)
 	}
