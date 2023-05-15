@@ -82,7 +82,7 @@ func Decrypt(keyFilenames ...string) error {
 	if err != nil {
 		return decErr(err)
 	}
-	if verifyOut != "" {
+	if verificationsOut != "" {
 		// TODO: This is fake
 		if err := writeVerificationToFile(pubKeyRing); err != nil {
 			return err
@@ -198,7 +198,7 @@ func writeVerificationToFile(pubKeyRing *crypto.KeyRing) error {
 		return decErr(err)
 	}
 	ver := utils.VerificationString(time.Now(), fgp, fgp)
-	outputVerFile, err := os.Create(verifyOut)
+	outputVerFile, err := os.Create(verificationsOut)
 	if err != nil {
 		return decErr(err)
 	}

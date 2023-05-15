@@ -86,7 +86,7 @@ var All = []*cli.Command{
 			sessionKeyOutFlag,
 			sessionKeyFlag,
 			passwordFlag,
-			verifyOutFlag,
+			verificationsOutFlag,
 			verifyWithFlag,
 			verifyNotBeforeFlag,
 			verifyNotAfterFlag,

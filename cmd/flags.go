@@ -4,19 +4,19 @@ import "github.com/urfave/cli/v2"
 
 // Variables defined by flags
 var (
-	backend       bool
-	extended      bool
-	noArmor       bool
-	asType        string
-	notBefore     string
-	notAfter      string
-	password      string
-	signWith      string
-	sessionKey    string
-	sessionKeyOut string
-	verifyOut     string
-	verifyWith    string
-	label         string
+	backend          bool
+	extended         bool
+	noArmor          bool
+	asType           string
+	notBefore        string
+	notAfter         string
+	password         string
+	signWith         string
+	sessionKey       string
+	sessionKeyOut    string
+	verificationsOut string
+	verifyWith       string
+	label            string
 )
 
 // All possible flags for commands
@@ -74,10 +74,11 @@ var (
 		Usage:       "--session-key-out=SESSIONKEY",
 		Destination: &sessionKeyOut,
 	}
-	verifyOutFlag = &cli.StringFlag{
-		Name:        "verify-out",
+	verificationsOutFlag = &cli.StringFlag{
+		Name:        "verifications-out",
+		Aliases:     []string{"verify-out"},
 		Usage:       "--verify-out=VERIFICATIONS",
-		Destination: &verifyOut,
+		Destination: &verificationsOut,
 	}
 	verifyWithFlag = &cli.StringFlag{
 		Name:        "verify-with",

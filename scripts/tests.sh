@@ -163,8 +163,8 @@ $sop encrypt --as=mime --sign-with=$alice_secret $alice_public < $message > $enc
 check_exit_code $? 0
 my_cat $encrypted
 
-comm "decrypt --session-key-out --verify-with --verify-out"
-$sop decrypt --session-key-out=$session_key --verify-with=$alice_public --verify-out=$verification $alice_secret < $encrypted > $decrypted_with_key
+comm "decrypt --session-key-out --verify-with --verifications-out"
+$sop decrypt --session-key-out=$session_key --verify-with=$alice_public --verifications-out=$verification $alice_secret < $encrypted > $decrypted_with_key
 check_exit_code $? 0
 my_cat $decrypted_with_key
 my_cat $verification
