@@ -65,6 +65,31 @@ var All = []*cli.Command{
 		},
 	},
 	{
+		Name:      "inline-sign",
+		Usage:     "Create an Inline-Signed Message",
+		UsageText: "gosop inline-sign [command options] KEY [KEY...] < DATA",
+		Flags: []cli.Flag{
+			noArmorFlag,
+			asSignedFlag,
+		},
+		Action: func(c *cli.Context) error {
+			return InlineSign(c.Args().Slice()...)
+		},
+	},
+	{
+		Name:      "inline-verify",
+		Usage:     "Verify an Inline-Signed Message",
+		UsageText: "gosop inline-verify CERTS [CERTS...] < INLINESIGNED",
+		Flags: []cli.Flag{
+			notBeforeFlag,
+			notAfterFlag,
+			verificationsOutFlag,
+		},
+		Action: func(c *cli.Context) error {
+			return InlineVerify(c.Args().Slice()...)
+		},
+	},
+	{
 		Name:      "encrypt",
 		Usage:     "Encrypt a Message",
 		UsageText: "gosop encrypt [command options] [CERTS...] < DATA",

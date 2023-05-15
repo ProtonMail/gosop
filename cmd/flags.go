@@ -42,6 +42,12 @@ var (
 		Usage:       "--as={binary|text}",
 		Destination: &asType,
 	}
+	asSignedFlag = &cli.StringFlag{
+		Name:        "as",
+		Value:       "binary",
+		Usage:       "--as={binary|text|clearsigned}",
+		Destination: &asType,
+	}
 	notBeforeFlag = &cli.StringFlag{
 		Name:        "not-before",
 		Value:       "-",

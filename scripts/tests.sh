@@ -72,6 +72,8 @@ alice_public=$data/alice.asc
 bob_public=$data/bob.asc
 bob_public_unarmored=$data/bob.bin
 session_key=$data/session.bin
+signed=$data/signed.asc
+verified=$data/verified.asc
 encrypted=$data/encrypted.asc
 encrypted_with_password=$data/encrypted_with_password.asc
 verification=$data/verification.txt
@@ -137,6 +139,18 @@ comm "verify --not-before"
 $sop verify --not-before=now $encrypted $alice_public < $message > $verification_too_young
 check_exit_code $? 3
 my_cat $verification_too_young
+
+comm "inline-sign"
+$sop inline-sign --as=clearsigned $alice_secret < $message > $signed
+check_exit_code $? 0
+my_cat $signed
+
+comm "inline-verify"
+$sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
+check_exit_code $? 0
+my_cat $verification
+my_cat $verified
+diff $message $verified
 
 comm "encrypt --with-password"
 $sop encrypt --with-password=$password < $message > $encrypted_with_password
