@@ -53,7 +53,7 @@ func Verify(input ...string) error {
 		signature = crypto.NewPGPSignature(sigBytes)
 	}
 
-	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, 0)
+	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, crypto.GetUnixTime())
 	if err != nil {
 		return Err3
 	}
