@@ -113,13 +113,10 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 			return keyRing, err
 		}
 		var key *crypto.Key
-		key, err = crypto.NewKeyFromArmored(string(keyData))
-		if err != nil {
-			// Try unarmored
+		if strings.Contains(string(keyData), "-----BEGIN PGP") {
+			key, err = crypto.NewKeyFromArmored(string(keyData))
+		} else {
 			key, err = crypto.NewKey(keyData)
-			if err != nil {
-				return nil, err
-			}
 		}
 		if err != nil {
 			return nil, err
