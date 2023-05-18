@@ -9,7 +9,7 @@ import (
 	"github.com/ProtonMail/gopenpgp/v2/constants"
 )
 
-const VERSION = "0.0.0"
+const VERSION = "0.1.0"
 
 // Version prints version information about gosop, and/or the
 // underlying OpenPGP library/libraries.
