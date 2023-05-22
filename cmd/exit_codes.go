@@ -17,6 +17,7 @@ var (
 	Err41 = cli.Exit("Invalid data type (no secret key where \"KEY\" expected, etc)", 41)
 	Err53 = cli.Exit("Non-text input where text expected", 53)
 	Err69 = cli.Exit("Unsupported subcommand", 69)
+	Err83 = cli.Exit("Options were supplied that are incompatible with each other", 83)
 )
 
 // Err99 returns the error message of any error not defined by the draft.

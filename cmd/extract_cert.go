@@ -3,7 +3,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // ExtractCert - Extract a Certificate from a Secret Key
