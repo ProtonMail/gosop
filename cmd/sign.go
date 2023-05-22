@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // Sign takes the data from stdin and signs it with the key passed as argument.
@@ -16,6 +16,7 @@ func Sign(keyFilenames ...string) error {
 		println("Please provide keys to create detached signature")
 		return Err19
 	}
+	pgp := crypto.PGP()
 
 	// Signer keyring
 	var keyRing *crypto.KeyRing
@@ -27,34 +28,34 @@ func Sign(keyFilenames ...string) error {
 	if keyRing.CountEntities() == 0 {
 		return Err41
 	}
+	builder := pgp.Sign().SigningKeys(keyRing).Detached()
 
-	// Message
-	var plaintextBytes []byte
-	if plaintextBytes, err = ioutil.ReadAll(os.Stdin); err != nil {
-		return signErr(err)
-	}
-	var text bool
+	// Prepare sign
 	if asType == textOpt {
-		text = true
+		builder.UTF8()
 	}
-	message := &crypto.PlainMessage{Data: plaintextBytes, TextType: text}
+
+	if !noArmor {
+		builder.Armor()
+	}
 
 	// Sign
-	var signature *crypto.PGPSignature
-	if signature, err = keyRing.SignDetached(message); err != nil {
+	signer, _ := builder.New()
+	ptWriter, err := signer.SigningWriter(os.Stdout, nil)
+	if err != nil {
+		return signErr(err)
+	}
+	_, err = io.Copy(ptWriter, os.Stdin)
+	if err != nil {
+		return signErr(err)
+	}
+	err = ptWriter.Close()
+	if err != nil {
 		return signErr(err)
 	}
 
-	if noArmor {
-		if _, err = os.Stdout.Write(signature.Data); err != nil {
-			return signErr(err)
-		}
-	} else {
-		var armored string
-		if armored, err = signature.GetArmored(); err != nil {
-			return signErr(err)
-		}
-		if _, err = os.Stdout.WriteString(armored + "\n"); err != nil {
+	if !noArmor {
+		if _, err = os.Stdout.WriteString("\n"); err != nil {
 			return signErr(err)
 		}
 	}

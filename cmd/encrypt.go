@@ -1,14 +1,15 @@
 package cmd
 
 import (
-	"io/ioutil"
+	"bytes"
+	"io"
 	"os"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 const (
@@ -24,36 +25,10 @@ func Encrypt(keyFilenames ...string) error {
 		println("Please provide recipients and/or passphrase (--with-password)")
 		return Err19
 	}
+	pgp := crypto.PGP()
+	builder := pgp.Encryption()
 	var err error
-	var plaintextBytes []byte
-	if plaintextBytes, err = ioutil.ReadAll(os.Stdin); err != nil {
-		return encErr(err)
-	}
-
-	// Password encrypt
-	var pgpMessage *crypto.PGPMessage
-	if password != "" {
-		pw, err := utils.ReadFileOrEnv(password)
-		if err != nil {
-			return err
-		}
-		pw = []byte(strings.TrimSpace(string(pw)))
-		ciphertext, err := helper.EncryptMessageWithPassword(pw, string(plaintextBytes))
-		if err != nil {
-			return encErr(err)
-		}
-		_, err = os.Stdout.WriteString(ciphertext + "\n")
-		return err
-	}
-
-	message := &crypto.PlainMessage{
-		Data:     plaintextBytes,
-		TextType: asType == textOpt}
-
-	pubKeyRing, err := utils.CollectKeys(keyFilenames...)
-	if err != nil {
-		return encErr(err)
-	}
+	var input io.Reader = os.Stdin
 
 	if signWith != "" {
 		// GopenPGP signs automatically if an unlocked private key is passed.
@@ -63,25 +38,58 @@ func Encrypt(keyFilenames ...string) error {
 			return encErr(err)
 		}
 		defer privKeyRing.ClearPrivateParams()
-		pgpMessage, err = pubKeyRing.Encrypt(message, privKeyRing)
-		if err != nil {
-			return encErr(err)
-		}
-	} else {
-		pgpMessage, err = pubKeyRing.Encrypt(message, nil)
-		if err != nil {
-			return encErr(err)
-		}
+		builder.SigningKeys(privKeyRing)
 	}
 
-	if noArmor {
-		_, err = os.Stdout.Write(pgpMessage.GetBinary())
-	} else {
-		armored, errArm := pgpMessage.GetArmored()
-		if errArm != nil {
-			return encErr(errArm)
+	if asType == textOpt {
+		builder.UTF8()
+		// Expensive check
+		var plaintextBytes []byte
+		if plaintextBytes, err = io.ReadAll(input); err != nil {
+			return encErr(err)
 		}
-		_, err = os.Stdout.WriteString(armored + "\n")
+		if !utf8.Valid(plaintextBytes) {
+			return Err53
+		}
+		input = bytes.NewReader(plaintextBytes)
+	}
+
+	// Password encrypt
+	if password != "" {
+		pw, err := utils.ReadFileOrEnv(password)
+		if err != nil {
+			return err
+		}
+		pw = []byte(strings.TrimSpace(string(pw)))
+		builder.Password(pw)
+	} else {
+		pubKeyRing, err := utils.CollectKeys(keyFilenames...)
+		if err != nil {
+			return encErr(err)
+		}
+		builder.Recipients(pubKeyRing)
+	}
+
+	if !noArmor {
+		builder.Armor()
+	}
+
+	encryption, _ := builder.New()
+	ptWriter, err := encryption.EncryptingWriter(os.Stdout, crypto.NewMetadata(asType == textOpt))
+	if err != nil {
+		return encErr(err)
+	}
+	_, err = io.Copy(ptWriter, input)
+	if err != nil {
+		return encErr(err)
+	}
+	err = ptWriter.Close()
+	if err != nil {
+		return encErr(err)
+	}
+
+	if !noArmor {
+		_, err = os.Stdout.WriteString("\n")
 	}
 	return err
 }

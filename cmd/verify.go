@@ -1,14 +1,15 @@
 package cmd
 
 import (
+	"bytes"
 	"encoding/hex"
-	"io/ioutil"
 	"os"
 	"time"
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // Verify checks the validity of a signature against a set of certificates.
@@ -25,46 +26,45 @@ func Verify(input ...string) error {
 		println("--not-after and --not-before are not implemented.")
 		return Err37
 	}
+	pgp := crypto.PGP()
 
 	// Collect keyring
 	keyRing, err := utils.CollectKeys(input[1:]...)
 	if err != nil {
 		return verErr(err)
 	}
-
-	plaintextBytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return verErr(err)
-	}
-	var text bool
-	if asType == textOpt {
-		text = true
-	}
-	message := &crypto.PlainMessage{Data: plaintextBytes, TextType: text}
+	verifier, _ := pgp.Verify().VerifyKeys(keyRing).New()
 
 	// Collect signature
 	sigBytes, err := utils.ReadFileOrEnv(input[0])
 	if err != nil {
 		return verErr(err)
 	}
-	var signature *crypto.PGPSignature
-	signature, err = crypto.NewPGPSignatureFromArmored(string(sigBytes))
+	var signature []byte
+	signature, err = armor.UnarmorBytes(sigBytes)
 	if err != nil {
-		signature = crypto.NewPGPSignature(sigBytes)
+		signature = sigBytes
 	}
 
-	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, crypto.GetUnixTime())
-	if err != nil {
-		os.Stderr.WriteString(err.Error() + "\n")
-		return Err3
-	}
-
-	// TODO: This is fake
-	fgp, err := hex.DecodeString(keyRing.GetKeys()[0].GetFingerprint())
+	dataReader, err := verifier.VerifyingReader(os.Stdin, bytes.NewReader(signature))
 	if err != nil {
 		return verErr(err)
 	}
-	ver := utils.VerificationString(time.Unix(creationTime, 0), fgp, fgp)
+	result, err := dataReader.DiscardAllAndVerifySignature()
+	if err != nil {
+		return verErr(err)
+	}
+	if result.HasSignatureError() {
+		return Err3
+	}
+	creationTime := result.SignatureCreationTime()
+	fingerprintSign := result.SignedByFingerprint()
+	fingerprintPrimarySign, err := hex.DecodeString(result.SignedByKey().GetFingerprint())
+	if err != nil {
+		return verErr(err)
+	}
+
+	ver := utils.VerificationString(time.Unix(creationTime, 0), fingerprintSign, fingerprintPrimarySign)
 	_, err = os.Stdout.WriteString(ver + "\n")
 
 	return err

@@ -140,12 +140,24 @@ $sop verify --not-before=now $encrypted $alice_public < $message > $verification
 check_exit_code $? 3
 my_cat $verification_too_young
 
-comm "inline-sign"
+comm "inline-sign --as=clearsigned"
 $sop inline-sign --as=clearsigned $alice_secret < $message > $signed
 check_exit_code $? 0
 my_cat $signed
 
-comm "inline-verify"
+comm "inline-verify clearsigned"
+$sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
+check_exit_code $? 0
+my_cat $verification
+my_cat $verified
+diff $message $verified
+
+comm "inline-sign --as=text"
+$sop inline-sign --as=text $alice_secret < $message > $signed
+check_exit_code $? 0
+my_cat $signed
+
+comm "inline-verify text"
 $sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
 check_exit_code $? 0
 my_cat $verification

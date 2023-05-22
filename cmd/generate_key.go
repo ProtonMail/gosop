@@ -5,7 +5,8 @@ import (
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/constants"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // GenerateKey creates a single default OpenPGP certificate with zero or more
@@ -22,16 +23,16 @@ func GenerateKey(userIDs ...string) error {
 			return kgErr(err)
 		}
 	}
-
-	// Generate RSA key
-	rsaKey, err := crypto.GenerateKey(name, email, "rsa", 2048)
+	pgp := crypto.PGP()
+	// Generate key
+	key, err := pgp.GenerateKey(name, email, constants.StandardLevel)
 	if err != nil {
 		return kgErr(err)
 	}
 
 	// Output
 	if noArmor {
-		keyBytes, err := rsaKey.Serialize()
+		keyBytes, err := key.Serialize()
 		if err != nil {
 			return kgErr(err)
 		}
@@ -39,7 +40,7 @@ func GenerateKey(userIDs ...string) error {
 			return kgErr(err)
 		}
 	} else {
-		armored, err := rsaKey.Armor()
+		armored, err := key.Armor()
 		if err != nil {
 			return kgErr(err)
 		}

@@ -1,18 +1,19 @@
 package main
 
 import (
-	"github.com/ProtonMail/gosop/cmd"
 	"log"
 	"os"
 	"sort"
+
+	"github.com/ProtonMail/gosop/cmd"
 
 	"github.com/urfave/cli/v2"
 )
 
 func main() {
 	app := &cli.App{
-		Name:  "gosop",
-		Usage: "Stateless OpenPGP implementation for GopenPGP",
+		Name:    "gosop",
+		Usage:   "Stateless OpenPGP implementation for GopenPGP",
 		Version: cmd.VERSION,
 		Authors: []*cli.Author{
 			&cli.Author{

@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/hex"
 	"errors"
-	"io/ioutil"
+	"io"
 	"os"
 	"strconv"
 	"strings"
@@ -12,8 +11,8 @@ import (
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/constants"
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/constants"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 )
@@ -26,68 +25,90 @@ var symKeyAlgos = map[packet.CipherFunction]string{
 	packet.CipherAES256: constants.AES256,
 }
 
+const ArmorMessagePrefix = "-----BEGIN PGP MESSAGE-----"
+
 // Decrypt takes the data from stdin and decrypts it with the key file passed as
 // argument, or a passphrase in a file passed with the --with-password flag.
 // Note: Can't encrypt both symmetrically (passphrase) and keys.
 // TODO: Multiple signers?
 //
 // --session-key-out=file flag: Outputs session key byte stream to given file.
-// About --with-session-key flag: This is not currently supported and could be
-// achieved with openpgp.packet, taking the first packet.EncryptedDataPacket
-// (be it Sym. Encrypted or AEAD Encrypted) and then decrypt directly.
 func Decrypt(keyFilenames ...string) error {
 	if len(keyFilenames) == 0 && password == "" && sessionKey == "" {
 		println("Please provide decryption keys, session key, or passphrase")
 		return Err69
 	}
+	var err error
 
-	ciphertextBytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return decErr(err)
-	}
-	ciphertext, err := crypto.NewPGPMessageFromArmored(string(ciphertextBytes))
-	if err != nil {
-		// If that fails, try binary
-		ciphertext = crypto.NewPGPMessage(ciphertextBytes)
-	}
+	pgp := crypto.PGP()
+	builder := pgp.Decryption()
+
 	var pubKeyRing *crypto.KeyRing
 	if verifyWith != "" {
 		pubKeyRing, err = utils.CollectKeys([]string{verifyWith}...)
 		if err != nil {
 			return decErr(err)
 		}
+		builder.VerifyKeys(pubKeyRing)
 	}
+	if (verificationsOut == "" && pubKeyRing.CountEntities() != 0) ||
+		(verificationsOut != "" && pubKeyRing.CountEntities() == 0) {
+		return Err23
+	}
+
 	var sk *crypto.SessionKey
 	if sessionKey != "" {
 		sk, err = parseSessionKey()
+		if err != nil {
+			return decErr(err)
+		}
+		builder.SessionKey(sk)
 	} else if password != "" {
-		sk, err = passwordDecrypt(ciphertext)
+		pw, err := utils.ReadFileOrEnv(password)
+		if err != nil {
+			return decErr(err)
+		}
+		pw = []byte(strings.TrimSpace(string(pw)))
+		builder.Password(pw)
 	} else {
-		sk, err = publicKeyDecrypt(ciphertext, keyFilenames)
+		privKeyRing, err := utils.CollectKeys(keyFilenames...)
+		if err != nil {
+			return decErr(err)
+		}
+		builder.DecryptionKeys(privKeyRing)
 	}
+
+	if sessionKeyOut != "" {
+		builder.RetrieveSessionKey()
+	}
+
+	decryptor, _ := builder.New()
+	ptReader, err := decryptor.DecryptingReader(os.Stdin)
 	if err != nil {
 		return decErr(err)
 	}
+	_, err = io.Copy(os.Stdout, ptReader)
+	if err != nil {
+		return decErr(err)
+	}
+
 	if sessionKeyOut != "" {
-		err := writeSessionKeyToFile(sk)
+		err = writeSessionKeyToFile(ptReader.SessionKey())
 		if err != nil {
 			return decErr(err)
 		}
 	}
-	plaintext, err := sk.DecryptAndVerify(getEncryptedDataPacket(ciphertext), pubKeyRing, crypto.GetUnixTime())
-	if err != nil {
-		return decErr(err)
-	}
-	_, err = os.Stdout.WriteString(plaintext.GetString())
-	if err != nil {
-		return decErr(err)
-	}
+
 	if verificationsOut != "" {
-		// TODO: This is fake
-		if err := writeVerificationToFile(pubKeyRing); err != nil {
-			return err
+		result, err := ptReader.VerifySignature()
+		if err != nil {
+			return decErr(err)
+		}
+		if err := writeVerificationToFileFromResult(result); err != nil {
+			return decErr(err)
 		}
 	}
+
 	return nil
 }
 
@@ -115,51 +136,6 @@ func parseSessionKey() (*crypto.SessionKey, error) {
 	}
 	sk := crypto.NewSessionKeyFromToken(skBytes, skAlgoName)
 	return sk, nil
-}
-
-func passwordDecrypt(message *crypto.PGPMessage) (*crypto.SessionKey, error) {
-	pw, err := utils.ReadFileOrEnv(password)
-	if err != nil {
-		return nil, err
-	}
-	pw = []byte(strings.TrimSpace(string(pw)))
-	sk, err := crypto.DecryptSessionKeyWithPassword(message.GetBinary(), pw)
-	if err != nil {
-		return nil, err
-	}
-	return sk, err
-}
-
-func publicKeyDecrypt(message *crypto.PGPMessage, keyFilenames []string) (*crypto.SessionKey, error) {
-	privKeyRing, err := utils.CollectKeys(keyFilenames...)
-	if err != nil {
-		return nil, err
-	}
-
-	sk, err := privKeyRing.DecryptSessionKey(message.GetBinary())
-	if err != nil {
-		return nil, err
-	}
-	return sk, nil
-}
-
-func getEncryptedDataPacket(message *crypto.PGPMessage) []byte {
-	bytesReader := bytes.NewReader(message.Data)
-	packets := packet.NewReader(bytesReader)
-	start := int64(0)
-	for {
-		p, err := packets.Next()
-		if err != nil {
-			break
-		}
-		switch p.(type) {
-		case *packet.SymmetricKeyEncrypted, *packet.EncryptedKey:
-			start = bytesReader.Size() - int64(bytesReader.Len())
-		case *packet.SymmetricallyEncrypted, *packet.AEADEncrypted:
-			break
-		}
-	}
-	return message.Data[start:]
 }
 
 func writeSessionKeyToFile(sk *crypto.SessionKey) error {

@@ -1,14 +1,15 @@
 package cmd
 
 import (
+	"encoding/hex"
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // InlineVerify checks the validity of a signed message against a set of certificates.
@@ -22,12 +23,14 @@ func InlineVerify(input ...string) error {
 		println("--not-after and --not-before are not implemented.")
 		return Err37
 	}
+	pgp := crypto.PGP()
 
 	// Collect keyring
 	keyRing, err := utils.CollectKeys(input...)
 	if err != nil {
 		return inlineVerErr(err)
 	}
+	builder := pgp.Verify().VerifyKeys(keyRing)
 
 	signatureBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
@@ -35,29 +38,74 @@ func InlineVerify(input ...string) error {
 	}
 
 	signature := string(signatureBytes)
-	if !strings.Contains(signature, "-----BEGIN PGP SIGNED MESSAGE-----") {
-		// Only clearsigned messages are supported for now.
-		return Err37
-	}
-
-	message, err := helper.VerifyCleartextMessage(keyRing, signature, crypto.GetUnixTime())
-	if err != nil {
-		return inlineVerErr(err)
-	}
-
-	_, err = os.Stdout.WriteString(message)
-	if err != nil {
-		return inlineVerErr(err)
-	}
-
-	if verificationsOut != "" {
-		// TODO: This is fake
-		if err := writeVerificationToFile(keyRing); err != nil {
-			return err
+	if strings.HasPrefix(signature, "-----BEGIN PGP SIGNED MESSAGE-----") {
+		// handle cleartext
+		verifier, _ := builder.New()
+		result, err := verifier.VerifyCleartext(signatureBytes)
+		if err != nil {
+			return inlineVerErr(err)
+		}
+		if result.HasSignatureError() {
+			return Err3
+		}
+		_, err = os.Stdout.WriteString(string(result.Cleartext()))
+		if err != nil {
+			return inlineVerErr(err)
+		}
+		if verificationsOut != "" {
+			if err := writeVerificationToFileFromResult(&result.VerifyResult); err != nil {
+				return inlineVerErr(err)
+			}
+		}
+	} else {
+		verifier, _ := builder.New()
+		result, err := verifier.Verify(nil, signatureBytes)
+		if err != nil {
+			return inlineVerErr(err)
+		}
+		if result.HasSignatureError() {
+			return Err3
+		}
+		_, err = os.Stdout.WriteString(string(result.Result()))
+		if err != nil {
+			return inlineVerErr(err)
+		}
+		if verificationsOut != "" {
+			if err := writeVerificationToFileFromResult(&result.VerifyResult); err != nil {
+				return inlineVerErr(err)
+			}
 		}
 	}
-
 	return err
+}
+
+func writeVerificationToFileFromResult(result *crypto.VerifyResult) error {
+	var ver string
+	outputVerFile, err := os.Create(verificationsOut)
+	if err != nil {
+		return err
+	}
+	if result.HasSignatureError() {
+		return nil
+	}
+	creationTime := result.SignatureCreationTime()
+	fingerprintSign := result.SignedByFingerprint()
+	fingerprintPrimarySign, err := hex.DecodeString(result.SignedByKey().GetFingerprint())
+	if err != nil {
+		return err
+	}
+	ver = utils.VerificationString(
+		time.Unix(creationTime, 0),
+		fingerprintSign,
+		fingerprintPrimarySign,
+	)
+	if _, err = outputVerFile.WriteString(ver + "\n"); err != nil {
+		return err
+	}
+	if err = outputVerFile.Close(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func inlineVerErr(err error) error {

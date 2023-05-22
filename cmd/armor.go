@@ -6,8 +6,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // ArmorComm takes unarmored OpenPGP material from Std input and outputs the
@@ -78,8 +79,7 @@ func armorDecidingType(input []byte) (armored string, err error) {
 		}
 	}
 	if _, ok := p.(*packet.Signature); ok {
-		sig := crypto.NewPGPSignature(input)
-		armored, err = sig.GetArmored()
+		armored, err = armor.ArmorPGPSignature(input)
 	}
 	return armored, err
 }
