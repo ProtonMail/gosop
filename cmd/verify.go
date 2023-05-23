@@ -2,9 +2,7 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/hex"
 	"os"
-	"time"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -57,16 +55,11 @@ func Verify(input ...string) error {
 	if result.HasSignatureError() {
 		return Err3
 	}
-	creationTime := result.SignatureCreationTime()
-	fingerprintSign := result.SignedByFingerprint()
-	fingerprintPrimarySign, err := hex.DecodeString(result.SignedByKey().GetFingerprint())
-	if err != nil {
-		return verErr(err)
+	if verificationsOut != "" {
+		if err := writeVerificationToFileFromResult(result); err != nil {
+			return inlineVerErr(err)
+		}
 	}
-
-	ver := utils.VerificationString(time.Unix(creationTime, 0), fingerprintSign, fingerprintPrimarySign)
-	_, err = os.Stdout.WriteString(ver + "\n")
-
 	return err
 }
 
