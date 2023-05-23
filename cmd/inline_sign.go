@@ -44,6 +44,7 @@ func InlineSign(keyFilenames ...string) error {
 	if keyRing.CountEntities() == 0 {
 		return Err41
 	}
+	defer keyRing.ClearPrivateParams()
 	pgp := crypto.PGP()
 	builder := pgp.Sign().SigningKeys(keyRing)
 

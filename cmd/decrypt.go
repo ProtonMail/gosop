@@ -85,6 +85,7 @@ func Decrypt(keyFilenames ...string) error {
 		if err != nil {
 			return decErr(err)
 		}
+		defer privKeyRing.ClearPrivateParams()
 		builder.DecryptionKeys(privKeyRing)
 	}
 

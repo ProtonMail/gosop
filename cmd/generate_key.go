@@ -34,6 +34,7 @@ func GenerateKey(userIDs ...string) error {
 	if err != nil {
 		return kgErr(err)
 	}
+	defer key.ClearPrivateParams()
 
 	// Lock key if required
 	if keyPassword != "" {
