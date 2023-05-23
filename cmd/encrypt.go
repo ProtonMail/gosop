@@ -37,7 +37,18 @@ func Encrypt(keyFilenames ...string) error {
 	if signWith != "" {
 		// GopenPGP signs automatically if an unlocked private key is passed.
 		var privKeyRing *crypto.KeyRing
-		privKeyRing, err = utils.CollectKeys(strings.Split(signWith, " ")...)
+		var pw []byte
+		if keyPassword != "" {
+			pw, err = utils.ReadFileOrEnv(keyPassword)
+			if err != nil {
+				return err
+			}
+			pw = []byte(strings.TrimSpace(string(pw)))
+		}
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, strings.Split(signWith, " ")...)
+		if failUnlock {
+			return Err67
+		}
 		if err != nil {
 			return encErr(err)
 		}

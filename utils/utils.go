@@ -20,6 +20,8 @@ const (
 	layoutSecondary = "20060102T150405Z0700" // If the above fails
 )
 
+const ArmorPrefix = ""
+
 // ParseUserID takes a string of the form "x (y) <z>" and outputs x, y, z and
 // an error. Note that x, y may contain whitespaces.
 func ParseUserID(id string) (x, y, z string, err error) {
@@ -126,6 +128,44 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		}
 	}
 	return keyRing, err
+}
+
+// CollectKeysPassword forms a crypto.KeyRing with all the keys provided in the input
+// files and tries to unlock them with password if locked. It returns the keyring,
+// a bool indicating an unlock issue, and an error.
+func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRing, bool, error) {
+	keyRing, err := crypto.NewKeyRing(nil)
+	if err != nil {
+		return keyRing, false, err
+	}
+	for _, filename := range keyFilenames {
+		keyData, err := ReadFileOrEnv(filename)
+		if err != nil {
+			return keyRing, false, err
+		}
+		var key *crypto.Key
+		key, err = crypto.NewKeyFromArmored(string(keyData))
+		if err != nil {
+			// Try unarmored
+			key, err = crypto.NewKey(keyData)
+			if err != nil {
+				return nil, false, err
+			}
+		}
+		locked, err := key.IsLocked()
+		if err == nil && locked {
+			unlockedKey, err := key.Unlock(password)
+			if err != nil {
+				// unlock failed
+				return nil, true, err
+			}
+			key = unlockedKey
+		}
+		if err = keyRing.AddKey(key); err != nil {
+			return nil, false, err
+		}
+	}
+	return keyRing, false, err
 }
 
 func ReadFileOrEnv(filename string) ([]byte, error) {
