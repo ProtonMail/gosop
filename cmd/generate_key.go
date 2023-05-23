@@ -23,7 +23,11 @@ func GenerateKey(userIDs ...string) error {
 			return kgErr(err)
 		}
 	}
-	pgp := crypto.PGP()
+	profile := utils.SelectProfile(selectedProfile)
+	if profile == nil {
+		return Err89
+	}
+	pgp := crypto.PGPWithProfile(profile)
 	// Generate key
 	key, err := pgp.GenerateKey(name, email, constants.StandardLevel)
 	if err != nil {

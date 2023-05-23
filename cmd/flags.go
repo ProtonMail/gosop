@@ -17,6 +17,7 @@ var (
 	verificationsOut string
 	verifyWith       string
 	label            string
+	selectedProfile  string
 )
 
 // All possible flags for commands
@@ -108,5 +109,11 @@ var (
 		Value:       "auto",
 		Usage:       "--label={auto|sig|key|cert|message}",
 		Destination: &label,
+	}
+	selectedProfileFlag = &cli.StringFlag{
+		Name:        "profile",
+		Value:       "default",
+		Usage:       "--profile=PROFILE",
+		Destination: &selectedProfile,
 	}
 )

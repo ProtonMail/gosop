@@ -41,7 +41,7 @@ func InlineSign(keyFilenames ...string) error {
 		return inlineSignErr(err)
 	}
 
-	if (asType == clearsignedOpt && asType == textOpt) && !utf8.Valid(messageBytes) {
+	if (asType == clearsignedOpt || asType == textOpt) && !utf8.Valid(messageBytes) {
 		return Err53
 	}
 

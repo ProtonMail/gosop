@@ -25,7 +25,11 @@ func Encrypt(keyFilenames ...string) error {
 		println("Please provide recipients and/or passphrase (--with-password)")
 		return Err19
 	}
-	pgp := crypto.PGP()
+	profile := utils.SelectProfile(selectedProfile)
+	if profile == nil {
+		return Err89
+	}
+	pgp := crypto.PGPWithProfile(profile)
 	builder := pgp.Encryption()
 	var err error
 	var input io.Reader = os.Stdin

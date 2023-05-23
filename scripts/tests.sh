@@ -1,8 +1,14 @@
 #!/bin/bash
 
-if [ $# != 3 ] || [ $2 != '-v' ]; then
-    echo "Usage: test.sh sop.binary -v <int verbosity>"
+profile="default"
+
+if [ $# -le 2 ] || [ $2 != '-v' ]; then
+    echo "Usage: test.sh sop.binary -v <int verbosity> [profile]"
     exit 1
+fi
+
+if [ ! -z "$4" ]; then
+    profile=$4
 fi
 
 sop=$1
@@ -90,12 +96,20 @@ comm "version"
 $sop version
 check_exit_code $? 0
 
-comm "generate-key --no-armor"
-$sop generate-key --no-armor 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+comm "list-profiles generate-key"
+$sop list-profiles generate-key
+check_exit_code $? 0
+
+comm "list-profiles encrypt"
+$sop list-profiles encrypt
 check_exit_code $? 0
 
 comm "generate-key --no-armor"
-$sop generate-key --no-armor 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+$sop generate-key --no-armor --profile=$profile 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+check_exit_code $? 0
+
+comm "generate-key --no-armor"
+$sop generate-key --no-armor --profile=$profile 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
 check_exit_code $? 0
 
 comm "generate-key"
@@ -165,7 +179,7 @@ my_cat $verified
 diff $message $verified
 
 comm "encrypt --with-password"
-$sop encrypt --with-password=$password < $message > $encrypted_with_password
+$sop encrypt --with-password=$password --profile=$profile < $message > $encrypted_with_password
 check_exit_code $? 0
 my_cat $encrypted_with_password
 
@@ -175,7 +189,7 @@ check_exit_code $? 0
 my_cat $decrypted_with_password
 
 comm "encrypt"
-$sop encrypt $alice_public < $message > $encrypted
+$sop encrypt --profile=$profile $alice_public < $message > $encrypted
 check_exit_code $? 0
 my_cat $encrypted
 
