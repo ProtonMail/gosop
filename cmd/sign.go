@@ -40,6 +40,7 @@ func Sign(keyFilenames ...string) error {
 	if keyRing.CountEntities() == 0 {
 		return Err41
 	}
+	defer keyRing.ClearPrivateParams()
 	builder := pgp.Sign().SigningKeys(keyRing).Detached()
 
 	// Prepare sign
