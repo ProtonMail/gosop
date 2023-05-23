@@ -19,11 +19,21 @@ var All = []*cli.Command{
 		},
 	},
 	{
+		Name:      "list-profiles",
+		Usage:     "List profiles for subcommands",
+		UsageText: "gosop list-profiles SUBCOMMAND",
+		Flags:     []cli.Flag{},
+		Action: func(c *cli.Context) error {
+			return ListProfiles(c.Args().Slice()...)
+		},
+	},
+	{
 		Name:      "generate-key",
 		Usage:     "Generate a Secret Key",
 		UsageText: "gosop generate-key [command options] [USERID...]",
 		Flags: []cli.Flag{
 			noArmorFlag,
+			selectedProfileFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return GenerateKey(c.Args().Slice()...)
@@ -94,6 +104,7 @@ var All = []*cli.Command{
 		Usage:     "Encrypt a Message",
 		UsageText: "gosop encrypt [command options] [CERTS...] < DATA",
 		Flags: []cli.Flag{
+			selectedProfileFlag,
 			asFlag,
 			noArmorFlag,
 			passwordFlag,

@@ -18,6 +18,7 @@ var (
 	Err53 = cli.Exit("Non-text input where text expected", 53)
 	Err69 = cli.Exit("Unsupported subcommand", 69)
 	Err83 = cli.Exit("Options were supplied that are incompatible with each other", 83)
+	Err89 = cli.Exit("The requested profile is unsupported or the indicated subcommand does not accept profiles", 89)
 )
 
 // Err99 returns the error message of any error not defined by the draft.
