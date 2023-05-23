@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -32,6 +33,19 @@ func GenerateKey(userIDs ...string) error {
 	key, err := pgp.GenerateKey(name, email, constants.StandardLevel)
 	if err != nil {
 		return kgErr(err)
+	}
+
+	// Lock key if required
+	if keyPassword != "" {
+		pw, err := utils.ReadFileOrEnv(keyPassword)
+		if err != nil {
+			return err
+		}
+		pw = []byte(strings.TrimSpace(string(pw)))
+		key, err = pgp.LockKey(key, pw)
+		if err != nil {
+			return kgErr(err)
+		}
 	}
 
 	// Output

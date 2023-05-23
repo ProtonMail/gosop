@@ -34,6 +34,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			noArmorFlag,
 			selectedProfileFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return GenerateKey(c.Args().Slice()...)
@@ -57,6 +58,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			noArmorFlag,
 			asFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Sign(c.Args().Slice()...)
@@ -81,6 +83,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			noArmorFlag,
 			asSignedFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return InlineSign(c.Args().Slice()...)
@@ -109,6 +112,7 @@ var All = []*cli.Command{
 			noArmorFlag,
 			passwordFlag,
 			signWithFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Encrypt(c.Args().Slice()...)
@@ -126,6 +130,7 @@ var All = []*cli.Command{
 			verifyWithFlag,
 			verifyNotBeforeFlag,
 			verifyNotAfterFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Decrypt(c.Args().Slice()...)

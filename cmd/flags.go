@@ -18,6 +18,7 @@ var (
 	verifyWith       string
 	label            string
 	selectedProfile  string
+	keyPassword      string
 )
 
 // All possible flags for commands
@@ -115,5 +116,10 @@ var (
 		Value:       "default",
 		Usage:       "--profile=PROFILE",
 		Destination: &selectedProfile,
+	}
+	keyPasswordFlag = &cli.StringFlag{
+		Name:        "with-key-password",
+		Usage:       "--with-key-password=PASSWORD",
+		Destination: &keyPassword,
 	}
 )

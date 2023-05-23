@@ -16,6 +16,7 @@ var (
 	Err37 = cli.Exit("Unsupported option", 37)
 	Err41 = cli.Exit("Invalid data type (no secret key where \"KEY\" expected, etc)", 41)
 	Err53 = cli.Exit("Non-text input where text expected", 53)
+	Err67 = cli.Exit("A KEYS input is password-protected (locked), and sop cannot unlock it with any of the --with-key-password options", 67)
 	Err69 = cli.Exit("Unsupported subcommand", 69)
 	Err83 = cli.Exit("Options were supplied that are incompatible with each other", 83)
 	Err89 = cli.Exit("The requested profile is unsupported or the indicated subcommand does not accept profiles", 89)

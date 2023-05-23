@@ -71,7 +71,18 @@ func Decrypt(keyFilenames ...string) error {
 		pw = []byte(strings.TrimSpace(string(pw)))
 		builder.Password(pw)
 	} else {
-		privKeyRing, err := utils.CollectKeys(keyFilenames...)
+		var pw []byte
+		if keyPassword != "" {
+			pw, err = utils.ReadFileOrEnv(keyPassword)
+			if err != nil {
+				return err
+			}
+			pw = []byte(strings.TrimSpace(string(pw)))
+		}
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+		if failUnlock {
+			return Err67
+		}
 		if err != nil {
 			return decErr(err)
 		}
