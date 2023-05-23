@@ -10,10 +10,18 @@ import (
 )
 
 const VERSION = "0.2.0"
+const SOP_VERSION = "~draft-dkg-openpgp-stateless-cli-06"
 
 // Version prints version information about gosop, and/or the
 // underlying OpenPGP library/libraries.
 func Version() error {
+	if sopSpec {
+		_, err := os.Stdout.WriteString(SOP_VERSION + "\n")
+		if err != nil {
+			return versionErr(err)
+		}
+		return nil
+	}
 	if !backend || extended {
 		_, err := os.Stdout.WriteString("gosop " + VERSION + "\n")
 		if err != nil {

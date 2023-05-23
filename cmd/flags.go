@@ -7,6 +7,7 @@ var (
 	backend          bool
 	extended         bool
 	noArmor          bool
+	sopSpec          bool
 	asType           string
 	notBefore        string
 	notAfter         string
@@ -37,6 +38,11 @@ var (
 		Name:        "no-armor",
 		Value:       false,
 		Destination: &noArmor,
+	}
+	sopSpecFlag = &cli.BoolFlag{
+		Name:        "sop-spec",
+		Value:       false,
+		Destination: &sopSpec,
 	}
 	asFlag = &cli.StringFlag{
 		Name:        "as",
