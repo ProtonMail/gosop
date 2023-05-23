@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
@@ -88,6 +89,13 @@ func writeVerificationToFileFromResult(result *crypto.VerifyResult) error {
 	if result.HasSignatureError() {
 		return nil
 	}
+	var mode string
+	signType := result.SignedWithType()
+	if signType == packet.SigTypeText {
+		mode = "mode:text"
+	} else {
+		mode = "mode:binary"
+	}
 	creationTime := result.SignatureCreationTime()
 	fingerprintSign := result.SignedByFingerprint()
 	fingerprintPrimarySign, err := hex.DecodeString(result.SignedByKey().GetFingerprint())
@@ -98,6 +106,7 @@ func writeVerificationToFileFromResult(result *crypto.VerifyResult) error {
 		time.Unix(creationTime, 0),
 		fingerprintSign,
 		fingerprintPrimarySign,
+		mode,
 	)
 	if _, err = outputVerFile.WriteString(ver + "\n"); err != nil {
 		return err

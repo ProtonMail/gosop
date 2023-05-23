@@ -7,7 +7,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -174,25 +173,6 @@ func writeSessionKeyToFile(sk *crypto.SessionKey) error {
 		return decErr(err)
 	}
 	if err = sessionKeyFile.Close(); err != nil {
-		return decErr(err)
-	}
-	return nil
-}
-
-func writeVerificationToFile(pubKeyRing *crypto.KeyRing) error {
-	fgp, err := hex.DecodeString(pubKeyRing.GetKeys()[0].GetFingerprint())
-	if err != nil {
-		return decErr(err)
-	}
-	ver := utils.VerificationString(time.Now(), fgp, fgp)
-	outputVerFile, err := os.Create(verificationsOut)
-	if err != nil {
-		return decErr(err)
-	}
-	if _, err = outputVerFile.WriteString(ver + "\n"); err != nil {
-		return decErr(err)
-	}
-	if err = outputVerFile.Close(); err != nil {
 		return decErr(err)
 	}
 	return nil

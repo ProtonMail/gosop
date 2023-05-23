@@ -90,9 +90,9 @@ func ParseDates(notBefore, notAfter string) (nb, na time.Time, err error) {
 }
 
 // VerificationString gives the line containing the result of a verification.
-func VerificationString(timestamp time.Time, fgp, primFgp []byte) string {
+func VerificationString(timestamp time.Time, fgp, primFgp []byte, mode string) string {
 	formattedTime := timestamp.UTC().Format(layout)
-	return fmt.Sprintf("%v %X %X", formattedTime, fgp, primFgp)
+	return fmt.Sprintf("%v %X %X %s", formattedTime, fgp, primFgp, mode)
 }
 
 // Linebreak prints "\n" to os.Stdout.
