@@ -24,8 +24,6 @@ var symKeyAlgos = map[packet.CipherFunction]string{
 	packet.CipherAES256: constants.AES256,
 }
 
-const ArmorMessagePrefix = "-----BEGIN PGP MESSAGE-----"
-
 // Decrypt takes the data from stdin and decrypts it with the key file passed as
 // argument, or a passphrase in a file passed with the --with-password flag.
 // Note: Can't encrypt both symmetrically (passphrase) and keys.
@@ -72,11 +70,10 @@ func Decrypt(keyFilenames ...string) error {
 	} else {
 		var pw []byte
 		if keyPassword != "" {
-			pw, err = utils.ReadFileOrEnv(keyPassword)
+			pw, err = utils.ReadSanitizedPassword(keyPassword)
 			if err != nil {
-				return err
+				return decErr(err)
 			}
-			pw = []byte(strings.TrimSpace(string(pw)))
 		}
 		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
 		if failUnlock {

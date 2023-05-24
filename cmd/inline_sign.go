@@ -3,7 +3,6 @@ package cmd
 import (
 	"io/ioutil"
 	"os"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/ProtonMail/gosop/utils"
@@ -28,11 +27,10 @@ func InlineSign(keyFilenames ...string) error {
 	var err error
 	var pw []byte
 	if keyPassword != "" {
-		pw, err = utils.ReadFileOrEnv(keyPassword)
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
 		if err != nil {
-			return err
+			return inlineSignErr(err)
 		}
-		pw = []byte(strings.TrimSpace(string(pw)))
 	}
 	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
 	if failUnlock {
