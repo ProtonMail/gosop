@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/ProtonMail/go-crypto/openpgp/armor"
+	"github.com/ProtonMail/go-crypto/v2/openpgp/armor"
 )
 
 // DearmorComm takes armored OpenPGP material from Std input and outputs the
