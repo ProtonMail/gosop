@@ -114,11 +114,9 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		if err != nil {
 			return keyRing, err
 		}
-		var key *crypto.Key
-		if strings.Contains(string(keyData), "-----BEGIN PGP") {
-			key, err = crypto.NewKeyFromArmored(string(keyData))
-		} else {
-			key, err = crypto.NewKey(keyData)
+		key, err := crypto.NewKey(keyData)
+		if err != nil {
+			return keyRing, err
 		}
 		if err != nil {
 			return nil, err
@@ -143,14 +141,9 @@ func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRi
 		if err != nil {
 			return keyRing, false, err
 		}
-		var key *crypto.Key
-		key, err = crypto.NewKeyFromArmored(string(keyData))
+		key, err := crypto.NewKey(keyData)
 		if err != nil {
-			// Try unarmored
-			key, err = crypto.NewKey(keyData)
-			if err != nil {
-				return nil, false, err
-			}
+			return keyRing, false, err
 		}
 		locked, err := key.IsLocked()
 		if err == nil && locked {

@@ -4,21 +4,20 @@ import (
 	"io"
 	"os"
 
-	"github.com/ProtonMail/go-crypto/v2/openpgp/armor"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
 )
 
 // DearmorComm takes armored OpenPGP material from Std input and outputs the
 // same material with ASCII-armoring removed.
 func DearmorComm() error {
-	block, err := armor.Decode(os.Stdin)
+	armorReader, err := armor.ArmorReader(os.Stdin)
 	if err != nil {
 		return dearmErr(err)
 	}
-	_, err = io.Copy(os.Stdout, block.Body)
+	_, err = io.Copy(os.Stdout, armorReader)
 	if err != nil {
 		return dearmErr(err)
 	}
-
 	return nil
 }
 
