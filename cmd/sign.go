@@ -3,7 +3,6 @@ package cmd
 import (
 	"io"
 	"os"
-	"strings"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -24,11 +23,10 @@ func Sign(keyFilenames ...string) error {
 	var err error
 	var pw []byte
 	if keyPassword != "" {
-		pw, err = utils.ReadFileOrEnv(keyPassword)
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
 		if err != nil {
-			return err
+			return signErr(err)
 		}
-		pw = []byte(strings.TrimSpace(string(pw)))
 	}
 	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
 	if failUnlock {

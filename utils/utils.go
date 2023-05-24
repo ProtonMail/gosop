@@ -181,3 +181,12 @@ func ReadFileOrEnv(filename string) ([]byte, error) {
 	}
 	return ioutil.ReadFile(filename)
 }
+
+func ReadSanitizedPassword(filename string) ([]byte, error) {
+	pw, err := ReadFileOrEnv(filename)
+	if err != nil {
+		return nil, err
+	}
+	pw = []byte(strings.TrimSpace(string(pw)))
+	return pw, nil
+}

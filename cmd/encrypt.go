@@ -39,11 +39,10 @@ func Encrypt(keyFilenames ...string) error {
 		var privKeyRing *crypto.KeyRing
 		var pw []byte
 		if keyPassword != "" {
-			pw, err = utils.ReadFileOrEnv(keyPassword)
+			pw, err = utils.ReadSanitizedPassword(keyPassword)
 			if err != nil {
-				return err
+				return encErr(err)
 			}
-			pw = []byte(strings.TrimSpace(string(pw)))
 		}
 		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, strings.Split(signWith, " ")...)
 		if failUnlock {
@@ -71,11 +70,10 @@ func Encrypt(keyFilenames ...string) error {
 
 	// Password encrypt
 	if password != "" {
-		pw, err := utils.ReadFileOrEnv(password)
+		pw, err := utils.ReadSanitizedPassword(password)
 		if err != nil {
-			return err
+			return encErr(err)
 		}
-		pw = []byte(strings.TrimSpace(string(pw)))
 		builder.Password(pw)
 	} else {
 		pubKeyRing, err := utils.CollectKeys(keyFilenames...)
