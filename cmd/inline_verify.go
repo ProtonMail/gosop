@@ -35,7 +35,7 @@ func InlineVerify(input ...string) error {
 	}
 
 	signature := string(signatureBytes)
-	if !strings.HasPrefix(signature, "-----BEGIN PGP SIGNED MESSAGE-----") {
+	if !strings.Contains(signature, "-----BEGIN PGP SIGNED MESSAGE-----") {
 		// Only clearsigned messages are supported for now.
 		return Err37
 	}
