@@ -55,6 +55,7 @@ func Verify(input ...string) error {
 
 	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, crypto.GetUnixTime())
 	if err != nil {
+		os.Stderr.WriteString(err.Error() + "\n")
 		return Err3
 	}
 
