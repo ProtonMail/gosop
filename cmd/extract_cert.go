@@ -11,15 +11,12 @@ import (
 // certificate.
 func ExtractCert() error {
 	// Get private key from standard input
-	var key *crypto.Key
-	var err error
-
+	key, err := crypto.NewKeyFromReader(os.Stdin)
+	if err != nil {
+		return certErr(err)
+	}
 	if noArmor {
 		// Unarmored I/O
-		key, err = crypto.NewKeyFromReader(os.Stdin)
-		if err != nil {
-			return certErr(err)
-		}
 		pubKey, err := key.GetPublicKey()
 		if err != nil {
 			return certErr(err)
@@ -29,10 +26,6 @@ func ExtractCert() error {
 		}
 	} else {
 		// Armored I/O
-		key, err = crypto.NewKeyFromArmoredReader(os.Stdin)
-		if err != nil {
-			return certErr(err)
-		}
 		pubKey, err := key.GetArmoredPublicKey()
 		if err != nil {
 			return certErr(err)
