@@ -20,9 +20,9 @@ func InlineVerify(input ...string) error {
 		return Err19
 	}
 
-	if notBefore != "-" || notAfter != "now" {
-		println("--not-after and --not-before are not implemented.")
-		return Err37
+	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
+	if err != nil {
+		return inlineVerErr(err)
 	}
 	pgp := crypto.PGP()
 
@@ -46,6 +46,7 @@ func InlineVerify(input ...string) error {
 		if err != nil {
 			return inlineVerErr(err)
 		}
+		result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
 		if result.HasSignatureError() {
 			return Err3
 		}
@@ -60,10 +61,11 @@ func InlineVerify(input ...string) error {
 		}
 	} else {
 		verifier, _ := builder.New()
-		result, err := verifier.Verify(nil, signatureBytes)
+		result, err := verifier.VerifyInline(signatureBytes)
 		if err != nil {
 			return inlineVerErr(err)
 		}
+		result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
 		if result.HasSignatureError() {
 			return Err3
 		}

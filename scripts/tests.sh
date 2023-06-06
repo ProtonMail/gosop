@@ -148,6 +148,7 @@ $sop verify --not-after=20060102T150405Z $encrypted $alice_public < $message > $
 check_exit_code $? 3
 my_cat $verification_too_old
 
+sleep 1
 comm "verify --not-before"
 $sop verify --not-before=now $encrypted $alice_public < $message > $verification_too_young
 check_exit_code $? 3

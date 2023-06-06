@@ -53,6 +53,11 @@ func Decrypt(keyFilenames ...string) error {
 		return Err23
 	}
 
+	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
+	if err != nil {
+		return decErr(err)
+	}
+
 	var sk *crypto.SessionKey
 	if sessionKey != "" {
 		sk, err = parseSessionKey()
@@ -112,6 +117,7 @@ func Decrypt(keyFilenames ...string) error {
 		if err != nil {
 			return decErr(err)
 		}
+		result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
 		if err := writeVerificationToFileFromResult(result); err != nil {
 			return decErr(err)
 		}
