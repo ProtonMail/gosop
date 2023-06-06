@@ -19,10 +19,9 @@ func Verify(input ...string) error {
 		println("Please provide a certificate (public key)")
 		return Err19
 	}
-
-	if notBefore != "-" || notAfter != "now" {
-		println("--not-after and --not-before are not implemented.")
-		return Err37
+	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
+	if err != nil {
+		return verErr(err)
 	}
 	pgp := crypto.PGP()
 
@@ -52,6 +51,7 @@ func Verify(input ...string) error {
 	if err != nil {
 		return verErr(err)
 	}
+	result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
 	if result.HasSignatureError() {
 		return Err3
 	}
