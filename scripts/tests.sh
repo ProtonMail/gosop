@@ -164,12 +164,12 @@ $sop inline-verify --verifications-out=$verification $alice_public < $signed > $
 check_exit_code $? 0
 my_cat $verification
 my_cat $verified
-diff $message $verified
+diff $message $verified | my_cat
 
 comm "inline-sign --as=text"
 $sop inline-sign --as=text --with-key-password=$password $alice_secret < $message > $signed
 check_exit_code $? 0
-my_cat $signed
+my_cat $signed | my_cat
 
 comm "inline-verify text"
 $sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified

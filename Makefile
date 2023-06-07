@@ -11,4 +11,6 @@ lint:
 	golint -set_exit_status ./... && golangci-lint run ./...
 
 test:  ## Run example script
-	bash scripts/tests.sh gosop -v $(verbosity)
+	bash scripts/tests.sh gosop -v $(verbosity) rfc4880
+	bash scripts/tests.sh gosop -v $(verbosity) draft-koch-openpgp
+	bash scripts/tests.sh gosop -v $(verbosity) draft-ietf-openpgp-crypto-refresh
