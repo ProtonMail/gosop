@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 
+	"github.com/ProtonMail/go-crypto/v2/openpgp/packet"
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/armor"
@@ -30,7 +31,7 @@ func Verify(input ...string) error {
 	if err != nil {
 		return verErr(err)
 	}
-	verifier, _ := pgp.Verify().VerifyKeys(keyRing).New()
+	verifier, _ := pgp.Verify().VerificationKeys(keyRing).New()
 
 	// Collect signature
 	sigBytes, err := utils.ReadFileOrEnv(input[0])
@@ -52,15 +53,45 @@ func Verify(input ...string) error {
 		return verErr(err)
 	}
 	result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
-	if result.HasSignatureError() {
+	if result.SignatureError() != nil {
 		return Err3
 	}
-	if verificationsOut != "" {
-		if err := writeVerificationToFileFromResult(result); err != nil {
-			return inlineVerErr(err)
-		}
+	if err = writeVerificationToOutput(os.Stdout, result); err != nil {
+		return verErr(err)
 	}
 	return err
+}
+
+func writeVerificationToOutput(out *os.File, result *crypto.VerifyResult) error {
+	var ver string
+	if result.SignatureError() != nil {
+		return nil
+	}
+	for _, signature := range result.Signatures {
+		if signature.SignatureError != nil || signature.Signature == nil {
+			continue
+		}
+		var mode string
+		signType := signature.Signature.SigType
+		if signType == packet.SigTypeText {
+			mode = "mode:text"
+		} else {
+			mode = "mode:binary"
+		}
+		creationTime := signature.Signature.CreationTime
+		fingerprintSign := signature.SignedBy.GetFingerprintBytes()
+		fingerprintPrimarySign := signature.SignedBy.GetFingerprintBytes()
+		ver = utils.VerificationString(
+			creationTime,
+			fingerprintSign,
+			fingerprintPrimarySign,
+			mode,
+		)
+		if _, err := out.WriteString(ver + "\n"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func verErr(err error) error {

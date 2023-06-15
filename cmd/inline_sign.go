@@ -75,7 +75,7 @@ func InlineSign(keyFilenames ...string) error {
 		}
 	} else if asType == textOpt {
 		signer, _ := builder.UTF8().New()
-		signedMessage, err := signer.Sign(messageBytes, crypto.NewMetadata(true))
+		signedMessage, err := signer.Sign(messageBytes)
 		if err != nil {
 			return inlineSignErr(err)
 		}
@@ -84,7 +84,7 @@ func InlineSign(keyFilenames ...string) error {
 		}
 	} else {
 		signer, _ := builder.New()
-		signedMessage, err := signer.Sign(messageBytes, nil)
+		signedMessage, err := signer.Sign(messageBytes)
 		if err != nil {
 			return inlineSignErr(err)
 		}

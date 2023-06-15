@@ -46,7 +46,7 @@ func Decrypt(keyFilenames ...string) error {
 		if err != nil {
 			return decErr(err)
 		}
-		builder.VerifyKeys(pubKeyRing)
+		builder.VerificationKeys(pubKeyRing)
 	}
 	if (verificationsOut == "" && pubKeyRing.CountEntities() != 0) ||
 		(verificationsOut != "" && pubKeyRing.CountEntities() == 0) {

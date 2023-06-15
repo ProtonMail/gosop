@@ -88,7 +88,7 @@ func Encrypt(keyFilenames ...string) error {
 	}
 
 	encryption, _ := builder.New()
-	ptWriter, err := encryption.EncryptingWriter(os.Stdout, crypto.NewMetadata(asType == textOpt))
+	ptWriter, err := encryption.EncryptingWriter(os.Stdout)
 	if err != nil {
 		return encErr(err)
 	}
