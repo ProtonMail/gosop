@@ -1,13 +1,10 @@
 package cmd
 
 import (
-	"encoding/hex"
 	"io/ioutil"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/ProtonMail/go-crypto/v2/openpgp/packet"
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
@@ -31,7 +28,7 @@ func InlineVerify(input ...string) error {
 	if err != nil {
 		return inlineVerErr(err)
 	}
-	builder := pgp.Verify().VerifyKeys(keyRing)
+	builder := pgp.Verify().VerificationKeys(keyRing)
 
 	signatureBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
@@ -47,7 +44,7 @@ func InlineVerify(input ...string) error {
 			return inlineVerErr(err)
 		}
 		result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
-		if result.HasSignatureError() {
+		if result.SignatureError() != nil {
 			return Err3
 		}
 		_, err = os.Stdout.WriteString(string(result.Cleartext()))
@@ -66,7 +63,7 @@ func InlineVerify(input ...string) error {
 			return inlineVerErr(err)
 		}
 		result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
-		if result.HasSignatureError() {
+		if result.SignatureError() != nil {
 			return Err3
 		}
 		_, err = os.Stdout.WriteString(string(result.Result()))
@@ -83,34 +80,12 @@ func InlineVerify(input ...string) error {
 }
 
 func writeVerificationToFileFromResult(result *crypto.VerifyResult) error {
-	var ver string
 	outputVerFile, err := os.Create(verificationsOut)
 	if err != nil {
 		return err
 	}
-	if result.HasSignatureError() {
-		return nil
-	}
-	var mode string
-	signType := result.SignedWithType()
-	if signType == packet.SigTypeText {
-		mode = "mode:text"
-	} else {
-		mode = "mode:binary"
-	}
-	creationTime := result.SignatureCreationTime()
-	fingerprintSign := result.SignedByFingerprint()
-	fingerprintPrimarySign, err := hex.DecodeString(result.SignedByKey().GetFingerprint())
-	if err != nil {
-		return err
-	}
-	ver = utils.VerificationString(
-		time.Unix(creationTime, 0),
-		fingerprintSign,
-		fingerprintPrimarySign,
-		mode,
-	)
-	if _, err = outputVerFile.WriteString(ver + "\n"); err != nil {
+	defer outputVerFile.Close()
+	if err = writeVerificationToOutput(outputVerFile, result); err != nil {
 		return err
 	}
 	if err = outputVerFile.Close(); err != nil {

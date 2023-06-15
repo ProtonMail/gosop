@@ -26,17 +26,16 @@ func ListProfiles(commands ...string) error {
 		return Err89
 	}
 	profiles := profile.PresetProfiles()
-	_, err := os.Stdout.WriteString("default: use the defaults\n")
-	if err != nil {
-		return listProfileErr(err)
-	}
 	for id, profile := range profiles {
+		if profile == "default" {
+			continue
+		}
 		description := utils.GetProfileDescription(command, profile)
 		_, err := os.Stdout.WriteString(fmt.Sprintf("%s: %s\n", profile, description))
 		if err != nil {
 			return listProfileErr(err)
 		}
-		if id > 1 {
+		if id > 2 {
 			break
 		}
 	}

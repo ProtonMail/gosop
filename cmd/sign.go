@@ -52,7 +52,7 @@ func Sign(keyFilenames ...string) error {
 
 	// Sign
 	signer, _ := builder.New()
-	ptWriter, err := signer.SigningWriter(os.Stdout, nil)
+	ptWriter, err := signer.SigningWriter(os.Stdout)
 	if err != nil {
 		return signErr(err)
 	}
