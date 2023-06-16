@@ -9,7 +9,7 @@ import (
 	"github.com/ProtonMail/gopenpgp/v3/constants"
 )
 
-const VERSION = "0.2.0"
+const VERSION = "2.0.0"
 const SOP_VERSION = "~draft-dkg-openpgp-stateless-cli-06"
 
 // Version prints version information about gosop, and/or the
@@ -40,7 +40,7 @@ func Version() error {
 			return versionErr(errors.New("couldn't read debug information"))
 		}
 		for i, module := range info.Deps {
-			if module.Path == "github.com/ProtonMail/go-crypto" ||
+			if module.Path == "github.com/ProtonMail/go-crypto/v2" ||
 				module.Path == "golang.org/x/crypto" {
 				for module.Replace != nil {
 					module = module.Replace
