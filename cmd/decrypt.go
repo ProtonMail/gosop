@@ -96,7 +96,7 @@ func Decrypt(keyFilenames ...string) error {
 	}
 
 	decryptor, _ := builder.New()
-	ptReader, err := decryptor.DecryptingReader(os.Stdin)
+	ptReader, err := decryptor.DecryptingReader(os.Stdin, crypto.Auto)
 	if err != nil {
 		return decErr(err)
 	}
