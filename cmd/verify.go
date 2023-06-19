@@ -44,7 +44,7 @@ func Verify(input ...string) error {
 		signature = sigBytes
 	}
 
-	dataReader, err := verifier.VerifyingReader(os.Stdin, bytes.NewReader(signature))
+	dataReader, err := verifier.VerifyingReader(os.Stdin, bytes.NewReader(signature), crypto.Auto)
 	if err != nil {
 		return verErr(err)
 	}

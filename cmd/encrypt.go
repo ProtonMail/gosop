@@ -83,12 +83,13 @@ func Encrypt(keyFilenames ...string) error {
 		builder.Recipients(pubKeyRing)
 	}
 
-	if !noArmor {
-		builder.Armor()
+	encoding := crypto.Armor
+	if noArmor {
+		encoding = crypto.Bytes
 	}
 
 	encryption, _ := builder.New()
-	ptWriter, err := encryption.EncryptingWriter(os.Stdout)
+	ptWriter, err := encryption.EncryptingWriter(os.Stdout, encoding)
 	if err != nil {
 		return encErr(err)
 	}

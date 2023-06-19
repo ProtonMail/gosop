@@ -60,8 +60,9 @@ func InlineSign(keyFilenames ...string) error {
 		return Err83
 	}
 
-	if !noArmor {
-		builder.Armor()
+	encoding := crypto.Armor
+	if noArmor {
+		encoding = crypto.Bytes
 	}
 
 	if asType == clearsignedOpt {
@@ -75,7 +76,7 @@ func InlineSign(keyFilenames ...string) error {
 		}
 	} else if asType == textOpt {
 		signer, _ := builder.UTF8().New()
-		signedMessage, err := signer.Sign(messageBytes)
+		signedMessage, err := signer.Sign(messageBytes, encoding)
 		if err != nil {
 			return inlineSignErr(err)
 		}
@@ -84,7 +85,7 @@ func InlineSign(keyFilenames ...string) error {
 		}
 	} else {
 		signer, _ := builder.New()
-		signedMessage, err := signer.Sign(messageBytes)
+		signedMessage, err := signer.Sign(messageBytes, encoding)
 		if err != nil {
 			return inlineSignErr(err)
 		}

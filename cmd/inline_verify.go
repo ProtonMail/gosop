@@ -58,7 +58,7 @@ func InlineVerify(input ...string) error {
 		}
 	} else {
 		verifier, _ := builder.New()
-		result, err := verifier.VerifyInline(signatureBytes)
+		result, err := verifier.VerifyInline(signatureBytes, crypto.Auto)
 		if err != nil {
 			return inlineVerErr(err)
 		}
@@ -66,7 +66,7 @@ func InlineVerify(input ...string) error {
 		if result.SignatureError() != nil {
 			return Err3
 		}
-		_, err = os.Stdout.WriteString(string(result.Result()))
+		_, err = os.Stdout.WriteString(string(result.Bytes()))
 		if err != nil {
 			return inlineVerErr(err)
 		}

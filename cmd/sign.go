@@ -45,14 +45,14 @@ func Sign(keyFilenames ...string) error {
 	if asType == textOpt {
 		builder.UTF8()
 	}
-
-	if !noArmor {
-		builder.Armor()
+	encoding := crypto.Armor
+	if noArmor {
+		encoding = crypto.Bytes
 	}
 
 	// Sign
 	signer, _ := builder.New()
-	ptWriter, err := signer.SigningWriter(os.Stdout)
+	ptWriter, err := signer.SigningWriter(os.Stdout, encoding)
 	if err != nil {
 		return signErr(err)
 	}
