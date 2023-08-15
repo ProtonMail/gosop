@@ -3,12 +3,12 @@ package utils
 import "github.com/ProtonMail/gopenpgp/v3/profile"
 
 var descriptions = map[string]string{
-	"generate-key rfc4880":                           "generates rsa keys with RFC 4880 algorithms",
-	"generate-key draft-koch-openpgp":                "generates x25519 keys with draft-koch algorithms",
-	"generate-key draft-ietf-openpgp-crypto-refresh": "generates x25519 keys with draft-ietf-openpgp-crypto-refresh algorithms",
-	"encrypt rfc4880":                                "no aead",
-	"encrypt draft-koch-openpgp":                     "aead enabled according to draft-koch",
-	"encrypt draft-ietf-openpgp-crypto-refresh":      "aead enabled according to draft-ietf-openpgp-crypto-refresh",
+	"generate-key rfc4880":                              "generates 3072-bit rsa keys",
+	"generate-key draft-koch-eddsa-for-openpgp-00":      "generates EdDSA/ECDH v4 keys with Curve25519",
+	"generate-key draft-ietf-openpgp-crypto-refresh-10": "generates Ed25519/X25519 v6 keys with Curve25519",
+	"encrypt rfc4880":                                   "CFB (SEIPDv1)",
+	"encrypt draft-koch-eddsa-for-openpgp-00":           "AEAD (SEIPDv2) enabled",
+	"encrypt draft-ietf-openpgp-crypto-refresh-10":      "AEAD (SEIPDv2) enabled",
 }
 
 func SelectProfile(name string) *profile.Custom {
