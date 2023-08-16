@@ -56,7 +56,7 @@ func Encrypt(keyFilenames ...string) error {
 	}
 
 	if asType == textOpt {
-		builder.UTF8()
+		builder.Utf8()
 		// Expensive check
 		var plaintextBytes []byte
 		if plaintextBytes, err = io.ReadAll(input); err != nil {

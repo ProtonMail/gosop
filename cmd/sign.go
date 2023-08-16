@@ -43,7 +43,7 @@ func Sign(keyFilenames ...string) error {
 
 	// Prepare sign
 	if asType == textOpt {
-		builder.UTF8()
+		builder.Utf8()
 	}
 	encoding := crypto.Armor
 	if noArmor {

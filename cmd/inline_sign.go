@@ -66,7 +66,7 @@ func InlineSign(keyFilenames ...string) error {
 	}
 
 	if asType == clearsignedOpt {
-		signer, _ := builder.UTF8().New()
+		signer, _ := builder.Utf8().New()
 		signedMessage, err := signer.SignCleartext(messageBytes)
 		if err != nil {
 			return inlineSignErr(err)
@@ -75,7 +75,7 @@ func InlineSign(keyFilenames ...string) error {
 			return inlineSignErr(err)
 		}
 	} else if asType == textOpt {
-		signer, _ := builder.UTF8().New()
+		signer, _ := builder.Utf8().New()
 		signedMessage, err := signer.Sign(messageBytes, encoding)
 		if err != nil {
 			return inlineSignErr(err)
