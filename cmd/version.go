@@ -40,7 +40,7 @@ func Version() error {
 			return versionErr(errors.New("couldn't read debug information"))
 		}
 		for i, module := range info.Deps {
-			if module.Path == "github.com/ProtonMail/go-crypto/v2" ||
+			if module.Path == "github.com/ProtonMail/go-crypto" ||
 				module.Path == "golang.org/x/crypto" {
 				for module.Replace != nil {
 					module = module.Replace
