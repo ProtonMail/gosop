@@ -25,7 +25,7 @@ func Encrypt(keyFilenames ...string) error {
 		println("Please provide recipients and/or passphrase (--with-password)")
 		return Err19
 	}
-	profile := utils.SelectProfile(selectedProfile)
+	profile := utils.SelectEncryptionProfile(selectedProfile)
 	if profile == nil {
 		return Err89
 	}
