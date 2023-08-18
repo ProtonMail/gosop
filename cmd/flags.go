@@ -1,6 +1,9 @@
 package cmd
 
-import "github.com/urfave/cli/v2"
+import (
+	"github.com/ProtonMail/gosop/utils"
+	"github.com/urfave/cli/v2"
+)
 
 // Variables defined by flags
 var (
@@ -119,7 +122,7 @@ var (
 	}
 	selectedProfileFlag = &cli.StringFlag{
 		Name:        "profile",
-		Value:       "default",
+		Value:       utils.DefaultProfileName,
 		Usage:       "--profile=PROFILE",
 		Destination: &selectedProfile,
 	}

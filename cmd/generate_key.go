@@ -14,7 +14,7 @@ import (
 // force the USERID of this implementation to be of the form "name (comment)
 // <email>".
 func GenerateKey(userIDs ...string) error {
-	profile := utils.SelectProfile(selectedProfile)
+	profile := utils.SelectKeyGenerationProfile(selectedProfile)
 	if profile == nil {
 		return Err89
 	}

@@ -4,6 +4,8 @@ github.com/ProtonMail/go-crypto v0.0.0-20230816083609-9c54acec5c54/go.mod h1:K4v
 github.com/ProtonMail/go-mime v0.0.0-20230322103455-7d82a3887f2f/go.mod h1:gcr0kNtGBqin9zDW9GOHcVntrwnjrK+qdJ06mWYBybw=
 github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230816084546-bebe9d408c2a h1:j6ie7WK64dPMbZM7p8oVAfy45J+LCzaByHLRzMLVvHk=
 github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230816084546-bebe9d408c2a/go.mod h1:cycolnDlwymOS9QnSr588CA4Hpu95YKzwWFLTCdRtgM=
+github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230818115022-5af72158cf1c h1:LJ41oxLgCHIoYFbzAelVhtwoPkAfHFuBdnMWfT79beo=
+github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230818115022-5af72158cf1c/go.mod h1:cycolnDlwymOS9QnSr588CA4Hpu95YKzwWFLTCdRtgM=
 github.com/bwesterb/go-ristretto v1.2.3/go.mod h1:fUIoIZaG73pV5biE2Blr2xEzDoMj7NFEuV9ekS419A0=
 github.com/cloudflare/circl v1.3.3 h1:fE/Qz0QdIGqeWfnwq0RE0R7MI51s0M2E4Ga9kq5AEMs=
 github.com/cloudflare/circl v1.3.3/go.mod h1:5XYMA4rFBvNIrhs50XuiBJ15vF2pZn4nnUKZrLbUZFA=

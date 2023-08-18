@@ -1,14 +1,19 @@
 #!/bin/bash
 
-profile="default"
+profileKeyGen="default"
+profileEnc="default"
 
 if [ $# -le 2 ] || [ $2 != '-v' ]; then
-    echo "Usage: test.sh sop.binary -v <int verbosity> [profile]"
+    echo "Usage: test.sh sop.binary -v <int verbosity> [profile generate-key] [profile encryption]"
     exit 1
 fi
 
 if [ ! -z "$4" ]; then
-    profile=$4
+    profileKeyGen=$4
+fi
+
+if [ ! -z "$4" ]; then
+    profileEnc=$5
 fi
 
 sop=$1
@@ -107,15 +112,15 @@ $sop list-profiles encrypt
 check_exit_code $? 0
 
 comm "generate-key --no-armor"
-$sop generate-key --no-armor --profile=$profile --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+$sop generate-key --no-armor --profile=$profileKeyGen --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
 check_exit_code $? 0
 
 comm "generate-key --no-armor"
-$sop generate-key --no-armor --profile=$profile --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+$sop generate-key --no-armor --profile=$profileKeyGen --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
 check_exit_code $? 0
 
 comm "generate-key"
-$sop generate-key --profile=$profile --with-key-password=$password 'Alice Lovelace <alice@openpgp.example>' > $alice_secret
+$sop generate-key --profile=$profileKeyGen --with-key-password=$password 'Alice Lovelace <alice@openpgp.example>' > $alice_secret
 check_exit_code $? 0
 my_cat $alice_secret
 
@@ -179,7 +184,7 @@ my_cat $verified
 diff $message $verified
 
 comm "encrypt --with-password"
-$sop encrypt --with-password=$password --profile=$profile < $message > $encrypted_with_password
+$sop encrypt --with-password=$password --profile=$profileEnc < $message > $encrypted_with_password
 check_exit_code $? 0
 my_cat $encrypted_with_password
 
@@ -189,7 +194,7 @@ check_exit_code $? 0
 my_cat $decrypted_with_password
 
 comm "encrypt"
-$sop encrypt --profile=$profile $alice_public < $message > $encrypted
+$sop encrypt --profile=$profileEnc $alice_public < $message > $encrypted
 check_exit_code $? 0
 my_cat $encrypted
 
