@@ -162,10 +162,10 @@ func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRi
 }
 
 func ReadFileOrEnv(filename string) ([]byte, error) {
-	if filename[0:5] == "@ENV:" {
+	if len(filename) > 4 && filename[0:5] == "@ENV:" {
 		return []byte(os.Getenv(filename[5:])), nil
 	}
-	if filename[0:4] == "@FD:" {
+	if len(filename) > 3 && filename[0:4] == "@FD:" {
 		fd, err := strconv.ParseUint(filename[4:], 10, strconv.IntSize)
 		if err != nil {
 			return nil, err
