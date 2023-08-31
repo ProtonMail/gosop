@@ -1,8 +1,8 @@
 module github.com/ProtonMail/gosop
 
 require (
-	github.com/ProtonMail/go-crypto v0.0.0-20230816083609-9c54acec5c54
-	github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230818115022-5af72158cf1c
+	github.com/ProtonMail/go-crypto v0.0.0-20230831124408-462e89636beb
+	github.com/ProtonMail/gopenpgp/v3 v3.0.0-20230831124625-e8119bd3d420
 	github.com/urfave/cli/v2 v2.2.0
 )
 
