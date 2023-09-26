@@ -31,7 +31,10 @@ func Verify(input ...string) error {
 	if err != nil {
 		return verErr(err)
 	}
-	verifier, _ := pgp.Verify().VerificationKeys(keyRing).New()
+	verifier, _ := pgp.Verify().
+		VerificationKeys(keyRing).
+		EnableStrictMessageParsing().
+		New()
 
 	// Collect signature
 	sigBytes, err := utils.ReadFileOrEnv(input[0])
