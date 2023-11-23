@@ -29,8 +29,7 @@ func InlineVerify(input ...string) error {
 		return inlineVerErr(err)
 	}
 	builder := pgp.Verify().
-		VerificationKeys(keyRing).
-		EnableStrictMessageParsing()
+		VerificationKeys(keyRing)
 
 	signatureBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {

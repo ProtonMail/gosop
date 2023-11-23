@@ -38,8 +38,7 @@ func Decrypt(keyFilenames ...string) error {
 	var err error
 
 	pgp := crypto.PGP()
-	builder := pgp.Decryption().
-		EnableStrictMessageParsing()
+	builder := pgp.Decryption()
 
 	var pubKeyRing *crypto.KeyRing
 	if verifyWith != "" {
