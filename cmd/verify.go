@@ -33,7 +33,6 @@ func Verify(input ...string) error {
 	}
 	verifier, _ := pgp.Verify().
 		VerificationKeys(keyRing).
-		EnableStrictMessageParsing().
 		New()
 
 	// Collect signature
