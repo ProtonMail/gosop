@@ -41,8 +41,9 @@ func Decrypt(keyFilenames ...string) error {
 	builder := pgp.Decryption()
 
 	var pubKeyRing *crypto.KeyRing
-	if verifyWith != "" {
-		pubKeyRing, err = utils.CollectKeys([]string{verifyWith}...)
+	if verifyWith.Value() != nil {
+		verifyKeys := utils.CollectFilesFromCliSlice(verifyWith.Value())
+		pubKeyRing, err = utils.CollectKeys(verifyKeys...)
 		if err != nil {
 			return decErr(err)
 		}

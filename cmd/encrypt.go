@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"os"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/ProtonMail/gosop/utils"
@@ -34,7 +33,7 @@ func Encrypt(keyFilenames ...string) error {
 	var err error
 	var input io.Reader = os.Stdin
 
-	if signWith != "" {
+	if signWith.Value() != nil {
 		// GopenPGP signs automatically if an unlocked private key is passed.
 		var privKeyRing *crypto.KeyRing
 		var pw []byte
@@ -44,7 +43,8 @@ func Encrypt(keyFilenames ...string) error {
 				return encErr(err)
 			}
 		}
-		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, strings.Split(signWith, " ")...)
+		keys := utils.CollectFilesFromCliSlice(signWith.Value())
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keys...)
 		if failUnlock {
 			return Err67
 		}

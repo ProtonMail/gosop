@@ -15,11 +15,11 @@ var (
 	notBefore        string
 	notAfter         string
 	password         string
-	signWith         string
+	signWith         cli.StringSlice
 	sessionKey       string
 	sessionKeyOut    string
 	verificationsOut string
-	verifyWith       string
+	verifyWith       cli.StringSlice
 	label            string
 	selectedProfile  string
 	keyPassword      string
@@ -76,9 +76,9 @@ var (
 		Usage:       "--with-password=PASSWORD",
 		Destination: &password,
 	}
-	signWithFlag = &cli.StringFlag{
+	signWithFlag = &cli.StringSliceFlag{
 		Name:        "sign-with",
-		Usage:       "--sign-with=KEY",
+		Usage:       "[--sign-with=KEY..]",
 		Destination: &signWith,
 	}
 	sessionKeyFlag = &cli.StringFlag{
@@ -97,9 +97,9 @@ var (
 		Usage:       "--verify-out=VERIFICATIONS",
 		Destination: &verificationsOut,
 	}
-	verifyWithFlag = &cli.StringFlag{
+	verifyWithFlag = &cli.StringSliceFlag{
 		Name:        "verify-with",
-		Usage:       "--verify-out=CERTS",
+		Usage:       "[--verify-out=CERTS...]",
 		Destination: &verifyWith,
 	}
 	verifyNotBeforeFlag = &cli.StringFlag{

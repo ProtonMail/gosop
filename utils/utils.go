@@ -118,9 +118,6 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		if err != nil {
 			return keyRing, err
 		}
-		if err != nil {
-			return nil, err
-		}
 		if err = keyRing.AddKey(key); err != nil {
 			return nil, err
 		}
@@ -182,4 +179,12 @@ func ReadSanitizedPassword(filename string) ([]byte, error) {
 	}
 	pw = []byte(strings.TrimSpace(string(pw)))
 	return pw, nil
+}
+
+func CollectFilesFromCliSlice(data []string) []string {
+	result := []string{}
+	for _, value := range data {
+		result = append(result, strings.Split(value, " ")...)
+	}
+	return result
 }
