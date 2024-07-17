@@ -16,7 +16,7 @@ func main() {
 		Usage:   "Stateless OpenPGP implementation for GopenPGP",
 		Version: cmd.VERSION,
 		Authors: []*cli.Author{
-			&cli.Author{
+			{
 				Name: "Proton Technologies AG",
 			},
 		},

@@ -1,38 +1,149 @@
 package utils
 
-import "github.com/ProtonMail/gopenpgp/v3/profile"
+import (
+	"crypto"
+	"strings"
+
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
+	"github.com/ProtonMail/go-crypto/openpgp/s2k"
+	"github.com/ProtonMail/gopenpgp/v3/constants"
+	"github.com/ProtonMail/gopenpgp/v3/profile"
+)
 
 const DefaultProfileName string = "default"
 
-var EncryptionProfiles = []string{"rfc4880", "draft-ietf-openpgp-crypto-refresh-10"}
-var KeyGenerationProfiles = []string{"draft-koch-eddsa-for-openpgp-00", "draft-ietf-openpgp-crypto-refresh-10", "rfc4880"}
+var EncryptionProfiles = createEncryptionProfiles()
+var KeyGenerationProfiles = createKeyGenerationProfiles()
 
-var descriptions = map[string]string{
-	"generate-key rfc4880":                              "Generates 3072-bit RSA keys",
-	"generate-key draft-koch-eddsa-for-openpgp-00":      "(default) Generates EdDSA/ECDH v4 keys with Curve25519",
-	"generate-key draft-ietf-openpgp-crypto-refresh-10": "Generates Ed25519/X25519 v6 keys with Curve25519",
-	"encrypt rfc4880":                                   "(default) CFB (SEIPDv1)",
-	"encrypt draft-ietf-openpgp-crypto-refresh-10":      "AEAD (SEIPDv2) enabled",
+type SopProfile struct {
+	Name        string
+	Description string
+	pgpProfile  *profile.Custom
 }
 
 func SelectKeyGenerationProfile(name string) *profile.Custom {
-	if name == DefaultProfileName {
-		name = KeyGenerationProfiles[0]
+	lowercase := strings.ToLower(name)
+	selectedProfile := KeyGenerationProfiles[0].pgpProfile
+	for _, keyGenProfile := range KeyGenerationProfiles {
+		if keyGenProfile.Name == lowercase {
+			selectedProfile = keyGenProfile.pgpProfile
+		}
 	}
-	return profile.WithName(name)
+	return selectedProfile
 }
 
 func SelectEncryptionProfile(name string) *profile.Custom {
-	if name == DefaultProfileName {
-		name = EncryptionProfiles[0]
+	lowercase := strings.ToLower(name)
+	selectedProfile := EncryptionProfiles[0].pgpProfile
+	for _, encProfile := range EncryptionProfiles {
+		if encProfile.Name == lowercase {
+			selectedProfile = encProfile.pgpProfile
+		}
 	}
-	return profile.WithName(name)
+	return selectedProfile
 }
 
-func GetProfileDescription(cmd, profile string) string {
-	description, ok := descriptions[cmd+" "+profile]
-	if !ok {
-		return ""
+func createEncryptionProfiles() []*SopProfile {
+	return []*SopProfile{
+		{
+			Name:        "rfc4880",
+			Description: "(default) CFB (SEIPDv1) only",
+			pgpProfile:  defaultProfile(),
+		},
+		{
+			Name:        "rfc9580",
+			Description: "AEAD (SEIPDv2) enabled",
+			pgpProfile:  rfc9580(),
+		},
 	}
-	return description
+}
+
+func createKeyGenerationProfiles() []*SopProfile {
+	return []*SopProfile{
+		{
+			Name:        "draft-koch-eddsa",
+			Description: "(default) Generates EdDSA/ECDH v4 keys with Curve25519",
+			pgpProfile:  defaultProfile(),
+		},
+		{
+			Name:        "rfc4880",
+			Description: "Generates 3072-bit RSA keys",
+			pgpProfile:  rfc4880(),
+		},
+		{
+			Name:        "rfc9580",
+			Description: "Generates Ed25519/X25519 v6 keys with Curve25519",
+			pgpProfile:  rfc9580(),
+		},
+	}
+}
+
+func defaultProfile() *profile.Custom {
+	setKeyAlgorithm := func(cfg *packet.Config, securityLevel int8) {
+		cfg.Algorithm = packet.PubKeyAlgoEdDSA
+		switch securityLevel {
+		case constants.HighSecurity:
+			cfg.Curve = packet.Curve25519
+		default:
+			cfg.Curve = packet.Curve25519
+		}
+	}
+	return &profile.Custom{
+		Name:                 "default",
+		SetKeyAlgorithm:      setKeyAlgorithm,
+		Hash:                 crypto.SHA256,
+		CipherEncryption:     packet.CipherAES256,
+		CompressionAlgorithm: packet.CompressionZLIB,
+		CompressionConfiguration: &packet.CompressionConfig{
+			Level: 6,
+		},
+	}
+}
+
+func rfc4880() *profile.Custom {
+	setKeyAlgorithm := func(cfg *packet.Config, securityLevel int8) {
+		cfg.Algorithm = packet.PubKeyAlgoRSA
+		switch securityLevel {
+		case constants.HighSecurity:
+			cfg.RSABits = 4096
+		default:
+			cfg.RSABits = 3072
+		}
+	}
+	return &profile.Custom{
+		Name:                 "rfc4880",
+		SetKeyAlgorithm:      setKeyAlgorithm,
+		Hash:                 crypto.SHA256,
+		CipherEncryption:     packet.CipherAES256,
+		CompressionAlgorithm: packet.CompressionZLIB,
+	}
+}
+
+func rfc9580() *profile.Custom {
+	setKeyAlgorithm := func(cfg *packet.Config, securityLevel int8) {
+		switch securityLevel {
+		case constants.HighSecurity:
+			cfg.Algorithm = packet.PubKeyAlgoEd448
+		default:
+			cfg.Algorithm = packet.PubKeyAlgoEd25519
+		}
+	}
+	return &profile.Custom{
+		Name:                 "rfc9580",
+		SetKeyAlgorithm:      setKeyAlgorithm,
+		Hash:                 crypto.SHA512,
+		CipherEncryption:     packet.CipherAES256,
+		CompressionAlgorithm: packet.CompressionZLIB,
+		AeadKeyEncryption:    &packet.AEADConfig{},
+		AeadEncryption:       &packet.AEADConfig{},
+		S2kKeyEncryption: &s2k.Config{
+			S2KMode:      s2k.Argon2S2K,
+			Argon2Config: &s2k.Argon2Config{},
+		},
+		S2kEncryption: &s2k.Config{
+			S2KMode:      s2k.Argon2S2K,
+			Argon2Config: &s2k.Argon2Config{},
+		},
+		V6: true,
+	}
 }

@@ -17,11 +17,11 @@ func ListProfiles(commands ...string) error {
 	command := commands[0]
 	switch command {
 	case keyGenCommand:
-		if err := printProfiles(keyGenCommand, utils.KeyGenerationProfiles); err != nil {
+		if err := printProfiles(utils.KeyGenerationProfiles); err != nil {
 			listProfileErr(err)
 		}
 	case encryptCommand:
-		if err := printProfiles(encryptCommand, utils.EncryptionProfiles); err != nil {
+		if err := printProfiles(utils.EncryptionProfiles); err != nil {
 			listProfileErr(err)
 		}
 	default:
@@ -30,10 +30,9 @@ func ListProfiles(commands ...string) error {
 	return nil
 }
 
-func printProfiles(command string, profiles []string) error {
+func printProfiles(profiles []*utils.SopProfile) error {
 	for id, profile := range profiles {
-		description := utils.GetProfileDescription(command, profile)
-		_, err := os.Stdout.WriteString(fmt.Sprintf("%s: %s\n", profile, description))
+		_, err := os.Stdout.WriteString(fmt.Sprintf("%s: %s\n", profile.Name, profile.Description))
 		if err != nil {
 			return listProfileErr(err)
 		}
