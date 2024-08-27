@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // Time format layouts
@@ -19,6 +19,8 @@ const (
 	layout          = time.RFC3339           // See RFC3339 or ISO-8601
 	layoutSecondary = "20060102T150405Z0700" // If the above fails
 )
+
+const ArmorPrefix = ""
 
 // ParseUserID takes a string of the form "x (y) <z>" and outputs x, y, z and
 // an error. Note that x, y may contain whitespaces.
@@ -88,9 +90,9 @@ func ParseDates(notBefore, notAfter string) (nb, na time.Time, err error) {
 }
 
 // VerificationString gives the line containing the result of a verification.
-func VerificationString(timestamp time.Time, fgp, primFgp []byte) string {
+func VerificationString(timestamp time.Time, fgp, primFgp []byte, mode string) string {
 	formattedTime := timestamp.UTC().Format(layout)
-	return fmt.Sprintf("%v %X %X", formattedTime, fgp, primFgp)
+	return fmt.Sprintf("%v %X %X %s", formattedTime, fgp, primFgp, mode)
 }
 
 // Linebreak prints "\n" to os.Stdout.
@@ -112,14 +114,9 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 		if err != nil {
 			return keyRing, err
 		}
-		var key *crypto.Key
-		if strings.Contains(string(keyData), "-----BEGIN PGP") {
-			key, err = crypto.NewKeyFromArmored(string(keyData))
-		} else {
-			key, err = crypto.NewKey(keyData)
-		}
+		key, err := crypto.NewKey(keyData)
 		if err != nil {
-			return nil, err
+			return keyRing, err
 		}
 		if err = keyRing.AddKey(key); err != nil {
 			return nil, err
@@ -128,11 +125,44 @@ func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
 	return keyRing, err
 }
 
+// CollectKeysPassword forms a crypto.KeyRing with all the keys provided in the input
+// files and tries to unlock them with password if locked. It returns the keyring,
+// a bool indicating an unlock issue, and an error.
+func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRing, bool, error) {
+	keyRing, err := crypto.NewKeyRing(nil)
+	if err != nil {
+		return keyRing, false, err
+	}
+	for _, filename := range keyFilenames {
+		keyData, err := ReadFileOrEnv(filename)
+		if err != nil {
+			return keyRing, false, err
+		}
+		key, err := crypto.NewKey(keyData)
+		if err != nil {
+			return keyRing, false, err
+		}
+		locked, err := key.IsLocked()
+		if err == nil && locked {
+			unlockedKey, err := key.Unlock(password)
+			if err != nil {
+				// unlock failed
+				return nil, true, err
+			}
+			key = unlockedKey
+		}
+		if err = keyRing.AddKey(key); err != nil {
+			return nil, false, err
+		}
+	}
+	return keyRing, false, err
+}
+
 func ReadFileOrEnv(filename string) ([]byte, error) {
-	if filename[0:5] == "@ENV:" {
+	if len(filename) > 4 && filename[0:5] == "@ENV:" {
 		return []byte(os.Getenv(filename[5:])), nil
 	}
-	if filename[0:4] == "@FD:" {
+	if len(filename) > 3 && filename[0:4] == "@FD:" {
 		fd, err := strconv.ParseUint(filename[4:], 10, strconv.IntSize)
 		if err != nil {
 			return nil, err
@@ -140,4 +170,21 @@ func ReadFileOrEnv(filename string) ([]byte, error) {
 		return ioutil.ReadAll(os.NewFile(uintptr(fd), filename))
 	}
 	return ioutil.ReadFile(filename)
+}
+
+func ReadSanitizedPassword(filename string) ([]byte, error) {
+	pw, err := ReadFileOrEnv(filename)
+	if err != nil {
+		return nil, err
+	}
+	pw = []byte(strings.TrimSpace(string(pw)))
+	return pw, nil
+}
+
+func CollectFilesFromCliSlice(data []string) []string {
+	result := []string{}
+	for _, value := range data {
+		result = append(result, strings.Split(value, " ")...)
+	}
+	return result
 }

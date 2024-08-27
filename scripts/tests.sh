@@ -1,8 +1,19 @@
 #!/bin/bash
 
-if [ $# != 3 ] || [ $2 != '-v' ]; then
-    echo "Usage: test.sh sop.binary -v <int verbosity>"
+profileKeyGen="default"
+profileEnc="default"
+
+if [ $# -le 2 ] || [ $2 != '-v' ]; then
+    echo "Usage: test.sh sop.binary -v <int verbosity> [profile generate-key] [profile encryption]"
     exit 1
+fi
+
+if [ ! -z "$4" ]; then
+    profileKeyGen=$4
+fi
+
+if [ ! -z "$4" ]; then
+    profileEnc=$5
 fi
 
 sop=$1
@@ -85,21 +96,31 @@ decrypted_with_key=$data/decrypted.txt
 decrypted_with_session_key=$data/decrypted.txt
 unarmored=$data/unarmored.bin
 
+printf "\nOír la noche inmensa, más inmensa sin ella.\nY el verso cae al alma como al pasto el rocío.\n" > $message
+printf "test.123" > $password
 
 comm "version"
 $sop version
 check_exit_code $? 0
 
-comm "generate-key --no-armor"
-$sop generate-key --no-armor 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+comm "list-profiles generate-key"
+$sop list-profiles generate-key
+check_exit_code $? 0
+
+comm "list-profiles encrypt"
+$sop list-profiles encrypt
 check_exit_code $? 0
 
 comm "generate-key --no-armor"
-$sop generate-key --no-armor 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+$sop generate-key --no-armor --profile=$profileKeyGen --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
+check_exit_code $? 0
+
+comm "generate-key --no-armor"
+$sop generate-key --no-armor --profile=$profileKeyGen --with-key-password=$password 'Bob Lovelace <bob@openpgp.example>' > $bob_secret
 check_exit_code $? 0
 
 comm "generate-key"
-$sop generate-key 'Alice Lovelace <alice@openpgp.example>' > $alice_secret
+$sop generate-key --profile=$profileKeyGen --with-key-password=$password 'Alice Lovelace <alice@openpgp.example>' > $alice_secret
 check_exit_code $? 0
 my_cat $alice_secret
 
@@ -112,11 +133,8 @@ comm "extract-cert --no-armor"
 $sop extract-cert --no-armor < $bob_secret > $bob_public_unarmored
 check_exit_code $? 0
 
-printf "\nOír la noche inmensa, más inmensa sin ella.\nY el verso cae al alma como al pasto el rocío.\n" > $message
-printf "test.123" > $password
-
 comm "sign"
-$sop sign --as=text $alice_secret < $message > $encrypted
+$sop sign --as=text --with-key-password=$password $alice_secret < $message > $encrypted
 check_exit_code $? 0
 my_cat $encrypted
 
@@ -135,17 +153,30 @@ $sop verify --not-after=20060102T150405Z $encrypted $alice_public < $message > $
 check_exit_code $? 3
 my_cat $verification_too_old
 
+sleep 1
 comm "verify --not-before"
 $sop verify --not-before=now $encrypted $alice_public < $message > $verification_too_young
 check_exit_code $? 3
 my_cat $verification_too_young
 
-comm "inline-sign"
-$sop inline-sign --as=clearsigned $alice_secret < $message > $signed
+comm "inline-sign --as=clearsigned"
+$sop inline-sign --as=clearsigned --with-key-password=$password $alice_secret < $message > $signed
 check_exit_code $? 0
 my_cat $signed
 
-comm "inline-verify"
+comm "inline-verify clearsigned"
+$sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
+check_exit_code $? 0
+my_cat $verification
+my_cat $verified
+diff $message $verified | my_cat
+
+comm "inline-sign --as=text"
+$sop inline-sign --as=text --with-key-password=$password $alice_secret < $message > $signed
+check_exit_code $? 0
+my_cat $signed | my_cat
+
+comm "inline-verify text"
 $sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
 check_exit_code $? 0
 my_cat $verification
@@ -153,7 +184,7 @@ my_cat $verified
 diff $message $verified
 
 comm "encrypt --with-password"
-$sop encrypt --with-password=$password < $message > $encrypted_with_password
+$sop encrypt --with-password=$password --profile=$profileEnc < $message > $encrypted_with_password
 check_exit_code $? 0
 my_cat $encrypted_with_password
 
@@ -163,22 +194,22 @@ check_exit_code $? 0
 my_cat $decrypted_with_password
 
 comm "encrypt"
-$sop encrypt $alice_public < $message > $encrypted
+$sop encrypt --profile=$profileEnc $alice_public < $message > $encrypted
 check_exit_code $? 0
 my_cat $encrypted
 
 comm "decrypt"
-$sop decrypt $alice_secret < $encrypted > $decrypted_with_key
+$sop decrypt --with-key-password=$password $alice_secret < $encrypted > $decrypted_with_key
 check_exit_code $? 0
 my_cat $decrypted_with_key
 
 comm "decrypt --as=text --sign-with"
-$sop encrypt --as=mime --sign-with=$alice_secret $alice_public < $message > $encrypted
+$sop encrypt --as=mime --sign-with=$alice_secret --with-key-password=$password $alice_public < $message > $encrypted
 check_exit_code $? 0
 my_cat $encrypted
 
 comm "decrypt --session-key-out --verify-with --verifications-out"
-$sop decrypt --session-key-out=$session_key --verify-with=$alice_public --verifications-out=$verification $alice_secret < $encrypted > $decrypted_with_key
+$sop decrypt --session-key-out=$session_key --verify-with=$alice_public --verifications-out=$verification --with-key-password=$password $alice_secret < $encrypted > $decrypted_with_key
 check_exit_code $? 0
 my_cat $decrypted_with_key
 my_cat $verification

@@ -6,24 +6,26 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // ArmorComm takes unarmored OpenPGP material from Std input and outputs the
 // same material with ASCII-armoring added.
 func ArmorComm(keyFilenames ...string) error {
-	input, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return armErr(err)
-	}
-
-	// If already armored, output directly and return
-	if string(input[:14]) == "-----BEGIN PGP" {
-		if _, err := os.Stdout.Write(input); err != nil {
+	inputReader, isArmored := armor.IsPGPArmored(os.Stdin)
+	if isArmored {
+		// If already armored, output directly and return
+		_, err := io.Copy(os.Stdout, inputReader)
+		if err != nil {
 			return armErr(err)
 		}
-		return nil
+	}
+
+	input, err := ioutil.ReadAll(inputReader)
+	if err != nil {
+		return armErr(err)
 	}
 
 	armored, err := armorDecidingType(input)
@@ -32,8 +34,7 @@ func ArmorComm(keyFilenames ...string) error {
 	}
 
 	if armored == "" {
-		message := crypto.NewPGPMessage(input)
-		armored, err = message.GetArmored()
+		armored, err = armor.ArmorPGPMessage(input)
 		if err != nil {
 			return armErr(err)
 		}
@@ -51,8 +52,7 @@ func armorDecidingType(input []byte) (armored string, err error) {
 	packets := packet.NewReader(bytes.NewReader(input))
 	var p packet.Packet
 	if p, err = packets.Next(); err != io.EOF && err != nil {
-		message := crypto.NewPGPMessage(input)
-		armored, err = message.GetArmored()
+		armored, err = armor.ArmorPGPMessage(input)
 		if err != nil {
 			return armored, err
 		}
@@ -78,8 +78,7 @@ func armorDecidingType(input []byte) (armored string, err error) {
 		}
 	}
 	if _, ok := p.(*packet.Signature); ok {
-		sig := crypto.NewPGPSignature(input)
-		armored, err = sig.GetArmored()
+		armored, err = armor.ArmorPGPSignature(input)
 	}
 	return armored, err
 }

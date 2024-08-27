@@ -13,9 +13,19 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			backendFlag,
 			extendedFlag,
+			sopSpecFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Version()
+		},
+	},
+	{
+		Name:      "list-profiles",
+		Usage:     "List profiles for subcommands",
+		UsageText: "gosop list-profiles SUBCOMMAND",
+		Flags:     []cli.Flag{},
+		Action: func(c *cli.Context) error {
+			return ListProfiles(c.Args().Slice()...)
 		},
 	},
 	{
@@ -24,6 +34,8 @@ var All = []*cli.Command{
 		UsageText: "gosop generate-key [command options] [USERID...]",
 		Flags: []cli.Flag{
 			noArmorFlag,
+			selectedProfileFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return GenerateKey(c.Args().Slice()...)
@@ -47,6 +59,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			noArmorFlag,
 			asFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Sign(c.Args().Slice()...)
@@ -71,6 +84,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			noArmorFlag,
 			asSignedFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return InlineSign(c.Args().Slice()...)
@@ -94,10 +108,12 @@ var All = []*cli.Command{
 		Usage:     "Encrypt a Message",
 		UsageText: "gosop encrypt [command options] [CERTS...] < DATA",
 		Flags: []cli.Flag{
+			selectedProfileFlag,
 			asFlag,
 			noArmorFlag,
 			passwordFlag,
 			signWithFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Encrypt(c.Args().Slice()...)
@@ -115,6 +131,7 @@ var All = []*cli.Command{
 			verifyWithFlag,
 			verifyNotBeforeFlag,
 			verifyNotAfterFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Decrypt(c.Args().Slice()...)

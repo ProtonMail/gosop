@@ -1,14 +1,14 @@
 package cmd
 
 import (
-	"encoding/hex"
-	"io/ioutil"
+	"bytes"
 	"os"
-	"time"
 
+	"github.com/ProtonMail/go-crypto/openpgp/packet"
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // Verify checks the validity of a signature against a set of certificates.
@@ -20,54 +20,80 @@ func Verify(input ...string) error {
 		println("Please provide a certificate (public key)")
 		return Err19
 	}
-
-	if notBefore != "-" || notAfter != "now" {
-		println("--not-after and --not-before are not implemented.")
-		return Err37
+	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
+	if err != nil {
+		return verErr(err)
 	}
+	pgp := crypto.PGP()
 
 	// Collect keyring
 	keyRing, err := utils.CollectKeys(input[1:]...)
 	if err != nil {
 		return verErr(err)
 	}
-
-	plaintextBytes, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return verErr(err)
-	}
-	var text bool
-	if asType == textOpt {
-		text = true
-	}
-	message := &crypto.PlainMessage{Data: plaintextBytes, TextType: text}
+	verifier, _ := pgp.Verify().
+		VerificationKeys(keyRing).
+		New()
 
 	// Collect signature
 	sigBytes, err := utils.ReadFileOrEnv(input[0])
 	if err != nil {
 		return verErr(err)
 	}
-	var signature *crypto.PGPSignature
-	signature, err = crypto.NewPGPSignatureFromArmored(string(sigBytes))
+	var signature []byte
+	signature, err = armor.UnarmorBytes(sigBytes)
 	if err != nil {
-		signature = crypto.NewPGPSignature(sigBytes)
+		signature = sigBytes
 	}
 
-	creationTime, err := keyRing.GetVerifiedSignatureTimestamp(message, signature, crypto.GetUnixTime())
-	if err != nil {
-		os.Stderr.WriteString(err.Error() + "\n")
-		return Err3
-	}
-
-	// TODO: This is fake
-	fgp, err := hex.DecodeString(keyRing.GetKeys()[0].GetFingerprint())
+	dataReader, err := verifier.VerifyingReader(os.Stdin, bytes.NewReader(signature), crypto.Auto)
 	if err != nil {
 		return verErr(err)
 	}
-	ver := utils.VerificationString(time.Unix(creationTime, 0), fgp, fgp)
-	_, err = os.Stdout.WriteString(ver + "\n")
-
+	result, err := dataReader.DiscardAllAndVerifySignature()
+	if err != nil {
+		return verErr(err)
+	}
+	result.ConstrainToTimeRange(timeFrom.Unix(), timeTo.Unix())
+	if result.SignatureError() != nil {
+		return Err3
+	}
+	if err = writeVerificationToOutput(os.Stdout, result); err != nil {
+		return verErr(err)
+	}
 	return err
+}
+
+func writeVerificationToOutput(out *os.File, result *crypto.VerifyResult) error {
+	var ver string
+	if result.SignatureError() != nil {
+		return nil
+	}
+	for _, signature := range result.Signatures {
+		if signature.SignatureError != nil || signature.Signature == nil {
+			continue
+		}
+		var mode string
+		signType := signature.Signature.SigType
+		if signType == packet.SigTypeText {
+			mode = "mode:text"
+		} else {
+			mode = "mode:binary"
+		}
+		creationTime := signature.Signature.CreationTime
+		fingerprintSign := signature.SignedBy.GetFingerprintBytes()
+		fingerprintPrimarySign := signature.SignedBy.GetFingerprintBytes()
+		ver = utils.VerificationString(
+			creationTime,
+			fingerprintSign,
+			fingerprintPrimarySign,
+			mode,
+		)
+		if _, err := out.WriteString(ver + "\n"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func verErr(err error) error {

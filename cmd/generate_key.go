@@ -2,36 +2,55 @@ package cmd
 
 import (
 	"os"
+	"strings"
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 // GenerateKey creates a single default OpenPGP certificate with zero or more
 // User IDs. Given that go-crypto expects name, comment, email parameters, we
 // force the USERID of this implementation to be of the form "name (comment)
-// <email>", and we use strictly 1 USERID per generated key.
+// <email>".
 func GenerateKey(userIDs ...string) error {
-	// Parse first userID
-	var name, email string
-	if len(userIDs) > 0 {
-		var err error
-		name, _, email, err = utils.ParseUserID(userIDs[0])
+	profile := utils.SelectKeyGenerationProfile(selectedProfile)
+	if profile == nil {
+		return Err89
+	}
+	pgp := crypto.PGPWithProfile(profile)
+	// Generate key
+	gen := pgp.KeyGeneration()
+	for _, userID := range userIDs {
+		name, _, email, err := utils.ParseUserID(userID)
+		if err != nil {
+			return kgErr(err)
+		}
+		gen.AddUserId(name, email)
+	}
+
+	key, err := gen.New().GenerateKey()
+	if err != nil {
+		return kgErr(err)
+	}
+	defer key.ClearPrivateParams()
+
+	// Lock key if required
+	if keyPassword != "" {
+		pw, err := utils.ReadFileOrEnv(keyPassword)
+		if err != nil {
+			return err
+		}
+		pw = []byte(strings.TrimSpace(string(pw)))
+		key, err = pgp.LockKey(key, pw)
 		if err != nil {
 			return kgErr(err)
 		}
 	}
 
-	// Generate RSA key
-	rsaKey, err := crypto.GenerateKey(name, email, "rsa", 2048)
-	if err != nil {
-		return kgErr(err)
-	}
-
 	// Output
 	if noArmor {
-		keyBytes, err := rsaKey.Serialize()
+		keyBytes, err := key.Serialize()
 		if err != nil {
 			return kgErr(err)
 		}
@@ -39,7 +58,7 @@ func GenerateKey(userIDs ...string) error {
 			return kgErr(err)
 		}
 	} else {
-		armored, err := rsaKey.Armor()
+		armored, err := key.Armor()
 		if err != nil {
 			return kgErr(err)
 		}

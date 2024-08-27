@@ -7,8 +7,7 @@ import (
 
 	"github.com/ProtonMail/gosop/utils"
 
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
-	"github.com/ProtonMail/gopenpgp/v2/helper"
+	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
 const (
@@ -26,35 +25,73 @@ func InlineSign(keyFilenames ...string) error {
 	// Signer keyring
 	var keyRing *crypto.KeyRing
 	var err error
-	keyRing, err = utils.CollectKeys(keyFilenames...)
+	var pw []byte
+	if keyPassword != "" {
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
+		if err != nil {
+			return inlineSignErr(err)
+		}
+	}
+	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+	if failUnlock {
+		return Err67
+	}
 	if err != nil {
 		return inlineSignErr(err)
 	}
 	if keyRing.CountEntities() == 0 {
 		return Err41
 	}
+	defer keyRing.ClearPrivateParams()
+	pgp := crypto.PGP()
+	builder := pgp.Sign().SigningKeys(keyRing)
 
 	// Message
 	var messageBytes []byte
 	if messageBytes, err = ioutil.ReadAll(os.Stdin); err != nil {
 		return inlineSignErr(err)
 	}
-	if !utf8.Valid(messageBytes) {
+
+	if (asType == clearsignedOpt || asType == textOpt) && !utf8.Valid(messageBytes) {
 		return Err53
 	}
-	message := string(messageBytes)
+
+	if noArmor && asType == clearsignedOpt {
+		return Err83
+	}
+
+	encoding := crypto.Armor
+	if noArmor {
+		encoding = crypto.Bytes
+	}
 
 	if asType == clearsignedOpt {
-		signedMessage, err := helper.SignCleartextMessage(keyRing, message)
+		signer, _ := builder.Utf8().New()
+		signedMessage, err := signer.SignCleartext(messageBytes)
 		if err != nil {
 			return inlineSignErr(err)
 		}
-		if _, err = os.Stdout.WriteString(signedMessage + "\n"); err != nil {
+		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
+			return inlineSignErr(err)
+		}
+	} else if asType == textOpt {
+		signer, _ := builder.Utf8().New()
+		signedMessage, err := signer.Sign(messageBytes, encoding)
+		if err != nil {
+			return inlineSignErr(err)
+		}
+		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
 			return inlineSignErr(err)
 		}
 	} else {
-		// TODO: Support --as={binary|text}, and not just --as=clearsigned.
-		return Err37
+		signer, _ := builder.New()
+		signedMessage, err := signer.Sign(messageBytes, encoding)
+		if err != nil {
+			return inlineSignErr(err)
+		}
+		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
+			return inlineSignErr(err)
+		}
 	}
 	return nil
 }
