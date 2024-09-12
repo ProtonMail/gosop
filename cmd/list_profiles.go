@@ -31,13 +31,10 @@ func ListProfiles(commands ...string) error {
 }
 
 func printProfiles(profiles []*utils.SopProfile) error {
-	for id, profile := range profiles {
+	for _, profile := range profiles {
 		_, err := os.Stdout.WriteString(fmt.Sprintf("%s: %s\n", profile.Name, profile.Description))
 		if err != nil {
 			return listProfileErr(err)
-		}
-		if id > 2 {
-			break
 		}
 	}
 	return nil

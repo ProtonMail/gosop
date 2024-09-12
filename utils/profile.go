@@ -71,6 +71,16 @@ func createKeyGenerationProfiles() []*SopProfile {
 			Description: "Generates Ed25519/X25519 v6 keys with Curve25519",
 			pgpProfile:  rfc9580(),
 		},
+		{
+			Name:        "draft-ietf-openpgp-pqc-05",
+			Description: "ML-KEM and ML-DSA",
+			pgpProfile:  pqc(),
+		},
+		{
+			Name:        "draft-ietf-openpgp-persistent-symmetric-keys-00",
+			Description: "AEAD and HMAC",
+			pgpProfile:  symmetric(),
+		},
 	}
 }
 
@@ -84,4 +94,12 @@ func rfc4880() *profile.Custom {
 
 func rfc9580() *profile.Custom {
 	return profile.RFC9580()
+}
+
+func pqc() *profile.Custom {
+	return profile.PQC()
+}
+
+func symmetric() *profile.Custom {
+	return profile.Symmetric()
 }
