@@ -98,5 +98,11 @@ func createKeyGenerationProfiles() []*SopProfile {
 			PgpProfile:    profile.PQC(),
 			SecurityLevel: constants.HighSecurity,
 		},
+		{
+			Names:         []string{"draft-ietf-openpgp-persistent-symmetric-keys-03"},
+			Description:   "Generate a persistent symmetric key using AEAD",
+			PgpProfile:    profile.Symmetric(),
+			SecurityLevel: constants.StandardSecurity,
+		},
 	}
 }
