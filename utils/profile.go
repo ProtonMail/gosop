@@ -86,5 +86,17 @@ func createKeyGenerationProfiles() []*SopProfile {
 			PgpProfile:    profile.RFC9580(),
 			SecurityLevel: constants.HighSecurity,
 		},
+		{
+			Names:         []string{"rfc9980"},
+			Description:   "Generate v6 keys using ML-DSA-65+Ed25519/ML-KEM-768+X25519",
+			PgpProfile:    profile.PQC(),
+			SecurityLevel: constants.StandardSecurity,
+		},
+		{
+			Names:         []string{"rfc9980-high-security"},
+			Description:   "Generate v6 keys using ML-DSA-87+Ed448/ML-KEM-1024+X448",
+			PgpProfile:    profile.PQC(),
+			SecurityLevel: constants.HighSecurity,
+		},
 	}
 }
