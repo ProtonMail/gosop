@@ -31,7 +31,7 @@ func ListProfiles(commands ...string) error {
 }
 
 func printProfiles(profiles []*utils.SopProfile) error {
-	for id, profile := range profiles {
+	for _, profile := range profiles {
 		aliases := ""
 		if len(profile.Names) > 2 {
 			aliases = fmt.Sprintf(" (aliases: %s)", strings.Join(profile.Names[1:], ", "))
@@ -41,9 +41,6 @@ func printProfiles(profiles []*utils.SopProfile) error {
 		_, err := fmt.Printf("%s: %s%s\n", profile.Names[0], profile.Description, aliases)
 		if err != nil {
 			return listProfileErr(err)
-		}
-		if id > 2 {
-			break
 		}
 	}
 	return nil

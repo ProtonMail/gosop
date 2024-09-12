@@ -86,5 +86,17 @@ func createKeyGenerationProfiles() []*SopProfile {
 			PgpProfile:    profile.RFC9580(),
 			SecurityLevel: constants.HighSecurity,
 		},
+		{
+			Names:         []string{"draft-ietf-openpgp-pqc-05"},
+			Description:   "ML-KEM and ML-DSA",
+			PgpProfile:    profile.PQC(),
+			SecurityLevel: constants.StandardSecurity,
+		},
+		{
+			Names:         []string{"draft-ietf-openpgp-persistent-symmetric-keys-00"},
+			Description:   "AEAD and HMAC",
+			PgpProfile:    profile.Symmetric(),
+			SecurityLevel: constants.StandardSecurity,
+		},
 	}
 }
