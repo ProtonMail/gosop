@@ -55,6 +55,11 @@ func createEncryptionProfiles() []*SopProfile {
 			Description: "AEAD (SEIPDv2) enabled",
 			pgpProfile:  rfc9580(),
 		},
+		{
+			Name:        "pqc",
+			Description: "pqc with AEAD (SEIPDv2) enabled",
+			pgpProfile:  pqc(),
+		},
 	}
 }
 
@@ -74,6 +79,11 @@ func createKeyGenerationProfiles() []*SopProfile {
 			Name:        "rfc9580",
 			Description: "Generates Ed25519/X25519 v6 keys with Curve25519",
 			pgpProfile:  rfc9580(),
+		},
+		{
+			Name:        "pqc",
+			Description: "ML-KEM and ML-DSA",
+			pgpProfile:  pqc(),
 		},
 	}
 }
@@ -145,5 +155,46 @@ func rfc9580() *profile.Custom {
 			Argon2Config: &s2k.Argon2Config{},
 		},
 		V6: true,
+	}
+}
+
+func pqc() *profile.Custom {
+	setKeyAlgorithm := func(cfg *packet.Config, securityLevel int8) {
+		cfg.Algorithm = packet.PubKeyAlgoMldsa65Ed25519
+		switch securityLevel {
+		case constants.HighSecurity:
+			cfg.Curve = packet.Curve25519
+		default:
+			cfg.Curve = packet.Curve25519
+		}
+	}
+	return &profile.Custom{
+		Name:                 "pqc",
+		SetKeyAlgorithm:      setKeyAlgorithm,
+		Hash:                 crypto.SHA512,
+		CipherEncryption:     packet.CipherAES256,
+		CipherKeyEncryption:  packet.CipherAES256,
+		CompressionAlgorithm: packet.CompressionZLIB,
+		AeadKeyEncryption: &packet.AEADConfig{
+			DefaultMode: packet.AEADModeGCM,
+		},
+		AeadEncryption: &packet.AEADConfig{
+			DefaultMode: packet.AEADModeGCM,
+		},
+		CompressionConfiguration: &packet.CompressionConfig{
+			Level: 6,
+		},
+		S2kKeyEncryption: &s2k.Config{
+			S2KMode:      s2k.Argon2S2K,
+			Argon2Config: &s2k.Argon2Config{},
+		},
+		S2kEncryption: &s2k.Config{
+			S2KMode:      s2k.Argon2S2K,
+			Argon2Config: &s2k.Argon2Config{},
+		},
+		DisableIntendedRecipients:   true,
+		AllowAllPublicKeyAlgorithms: true,
+		AllowWeakRSA:                true,
+		V6:                          true,
 	}
 }
