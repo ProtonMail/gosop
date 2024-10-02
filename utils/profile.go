@@ -92,6 +92,7 @@ func defaultProfile() *profile.Custom {
 		Name:                 "default",
 		SetKeyAlgorithm:      setKeyAlgorithm,
 		Hash:                 crypto.SHA256,
+		AeadEncryption:       &packet.AEADConfig{},
 		CipherEncryption:     packet.CipherAES256,
 		CompressionAlgorithm: packet.CompressionZLIB,
 		CompressionConfiguration: &packet.CompressionConfig{
