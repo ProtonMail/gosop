@@ -14,6 +14,7 @@ var All = []*cli.Command{
 			backendFlag,
 			extendedFlag,
 			sopSpecFlag,
+			sopvFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Version()
