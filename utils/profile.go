@@ -61,8 +61,8 @@ func createEncryptionProfiles() []*SopProfile {
 func createKeyGenerationProfiles() []*SopProfile {
 	return []*SopProfile{
 		{
-			Name:        "draft-koch-eddsa",
-			Description: "(default) Generates EdDSA/ECDH v4 keys with Curve25519",
+			Name:        "default",
+			Description: "Generates EdDSA/ECDH v4 keys with Curve25519",
 			pgpProfile:  defaultProfile(),
 		},
 		{
