@@ -89,7 +89,6 @@ func defaultProfile() *profile.Custom {
 		}
 	}
 	return &profile.Custom{
-		Name:                 "default",
 		SetKeyAlgorithm:      setKeyAlgorithm,
 		Hash:                 crypto.SHA256,
 		CipherEncryption:     packet.CipherAES256,
@@ -111,7 +110,6 @@ func rfc4880() *profile.Custom {
 		}
 	}
 	return &profile.Custom{
-		Name:                 "rfc4880",
 		SetKeyAlgorithm:      setKeyAlgorithm,
 		Hash:                 crypto.SHA256,
 		CipherEncryption:     packet.CipherAES256,
@@ -129,7 +127,6 @@ func rfc9580() *profile.Custom {
 		}
 	}
 	return &profile.Custom{
-		Name:                 "rfc9580",
 		SetKeyAlgorithm:      setKeyAlgorithm,
 		Hash:                 crypto.SHA512,
 		CipherEncryption:     packet.CipherAES256,
