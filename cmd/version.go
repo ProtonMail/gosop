@@ -9,7 +9,7 @@ import (
 	"github.com/ProtonMail/gopenpgp/v3/constants"
 )
 
-const VERSION = "2.0.0-alpha"
+const VERSION = "1.0.0"
 const SOP_VERSION = "~draft-dkg-openpgp-stateless-cli-06"
 const SOPV_VERSION = "1.0"
 
