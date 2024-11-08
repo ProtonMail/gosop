@@ -21,7 +21,6 @@ var (
 	sessionKeyOut    string
 	verificationsOut string
 	verifyWith       cli.StringSlice
-	label            string
 	selectedProfile  string
 	keyPassword      string
 )
@@ -119,12 +118,6 @@ var (
 		Value:       "now",
 		Usage:       "--verify-not-after={-|DATE}",
 		Destination: &notAfter,
-	}
-	labelFlag = &cli.StringFlag{
-		Name:        "label",
-		Value:       "auto",
-		Usage:       "--label={auto|sig|key|cert|message}",
-		Destination: &label,
 	}
 	selectedProfileFlag = &cli.StringFlag{
 		Name:        "profile",

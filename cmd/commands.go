@@ -142,9 +142,6 @@ var All = []*cli.Command{
 		Name:      "armor",
 		Usage:     "Add ASCII Armor",
 		UsageText: "gosop armor [command options] < DATA",
-		Flags: []cli.Flag{
-			labelFlag,
-		},
 		Action: func(c *cli.Context) error {
 			return ArmorComm(c.Args().Slice()...)
 		},
