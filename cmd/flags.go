@@ -100,12 +100,12 @@ var (
 	verificationsOutFlag = &cli.StringFlag{
 		Name:        "verifications-out",
 		Aliases:     []string{"verify-out"},
-		Usage:       "--verify-out=VERIFICATIONS",
+		Usage:       "--verifications-out=VERIFICATIONS",
 		Destination: &verificationsOut,
 	}
 	verifyWithFlag = &cli.StringSliceFlag{
 		Name:        "verify-with",
-		Usage:       "[--verify-out=CERTS...]",
+		Usage:       "[--verify-with=CERTS...]",
 		Destination: &verifyWith,
 	}
 	verifyNotBeforeFlag = &cli.StringFlag{
