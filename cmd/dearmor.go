@@ -10,7 +10,17 @@ import (
 // DearmorComm takes armored OpenPGP material from Std input and outputs the
 // same material with ASCII-armoring removed.
 func DearmorComm() error {
-	armorReader, err := armor.ArmorReader(os.Stdin)
+	inputReader, isArmored := armor.IsPGPArmored(os.Stdin)
+	if !isArmored {
+		// If already dearmored, output directly and return
+		_, err := io.Copy(os.Stdout, inputReader)
+		if err != nil {
+			return dearmErr(err)
+		}
+		return nil
+	}
+
+	armorReader, err := armor.ArmorReader(inputReader)
 	if err != nil {
 		return dearmErr(err)
 	}
