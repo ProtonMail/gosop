@@ -21,6 +21,7 @@ func ArmorComm(keyFilenames ...string) error {
 		if err != nil {
 			return armErr(err)
 		}
+		return nil
 	}
 
 	input, err := ioutil.ReadAll(inputReader)
