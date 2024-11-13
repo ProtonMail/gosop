@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"os"
+	"strings"
 
 	"github.com/ProtonMail/gosop/utils"
 )
@@ -32,7 +32,13 @@ func ListProfiles(commands ...string) error {
 
 func printProfiles(profiles []*utils.SopProfile) error {
 	for id, profile := range profiles {
-		_, err := os.Stdout.WriteString(fmt.Sprintf("%s: %s\n", profile.Name, profile.Description))
+		aliases := ""
+		if len(profile.Names) > 2 {
+			aliases = fmt.Sprintf(" (aliases: %s)", strings.Join(profile.Names[1:], ", "))
+		} else if len(profile.Names) > 1 {
+			aliases = fmt.Sprintf(" (alias: %s)", profile.Names[1])
+		}
+		_, err := fmt.Printf("%s: %s%s\n", profile.Names[0], profile.Description, aliases)
 		if err != nil {
 			return listProfileErr(err)
 		}
