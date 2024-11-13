@@ -28,7 +28,7 @@ func Encrypt(keyFilenames ...string) error {
 	if profile == nil {
 		return Err89
 	}
-	pgp := crypto.PGPWithProfile(profile)
+	pgp := crypto.PGPWithProfile(profile.PgpProfile)
 	builder := pgp.Encryption()
 	var err error
 	var input io.Reader = os.Stdin

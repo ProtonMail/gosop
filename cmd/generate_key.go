@@ -18,7 +18,7 @@ func GenerateKey(userIDs ...string) error {
 	if profile == nil {
 		return Err89
 	}
-	pgp := crypto.PGPWithProfile(profile)
+	pgp := crypto.PGPWithProfile(profile.PgpProfile)
 	// Generate key
 	gen := pgp.KeyGeneration()
 	for _, userID := range userIDs {
@@ -29,7 +29,7 @@ func GenerateKey(userIDs ...string) error {
 		gen.AddUserId(name, email)
 	}
 
-	key, err := gen.New().GenerateKey()
+	key, err := gen.New().GenerateKeyWithSecurity(profile.SecurityLevel)
 	if err != nil {
 		return kgErr(err)
 	}
