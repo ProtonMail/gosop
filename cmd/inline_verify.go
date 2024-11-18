@@ -48,7 +48,7 @@ func InlineVerify(input ...string) error {
 		if result.SignatureError() != nil {
 			return Err3
 		}
-		_, err = os.Stdout.WriteString(string(result.Cleartext()))
+		_, err = os.Stdout.Write(result.Cleartext())
 		if err != nil {
 			return inlineVerErr(err)
 		}
@@ -67,7 +67,7 @@ func InlineVerify(input ...string) error {
 		if result.SignatureError() != nil {
 			return Err3
 		}
-		_, err = os.Stdout.WriteString(string(result.Bytes()))
+		_, err = os.Stdout.Write(result.Bytes())
 		if err != nil {
 			return inlineVerErr(err)
 		}
