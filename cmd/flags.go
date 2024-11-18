@@ -20,6 +20,7 @@ var (
 	sessionKey       string
 	sessionKeyOut    string
 	verificationsOut string
+	signaturesOut    string
 	verifyWith       cli.StringSlice
 	selectedProfile  string
 	keyPassword      string
@@ -101,6 +102,12 @@ var (
 		Aliases:     []string{"verify-out"},
 		Usage:       "--verifications-out=VERIFICATIONS",
 		Destination: &verificationsOut,
+	}
+	signaturesOutFlag = &cli.StringFlag{
+		Name:        "signatures-out",
+		Usage:       "--signatures-out=SIGNATURES",
+		Required:    true,
+		Destination: &signaturesOut,
 	}
 	verifyWithFlag = &cli.StringSliceFlag{
 		Name:        "verify-with",
