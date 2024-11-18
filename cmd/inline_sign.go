@@ -71,7 +71,7 @@ func InlineSign(keyFilenames ...string) error {
 		if err != nil {
 			return inlineSignErr(err)
 		}
-		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
+		if _, err = os.Stdout.Write(append(signedMessage, byte('\n'))); err != nil {
 			return inlineSignErr(err)
 		}
 	} else if asType == textOpt {
@@ -80,7 +80,7 @@ func InlineSign(keyFilenames ...string) error {
 		if err != nil {
 			return inlineSignErr(err)
 		}
-		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
+		if _, err = os.Stdout.Write(append(signedMessage, byte('\n'))); err != nil {
 			return inlineSignErr(err)
 		}
 	} else {
@@ -89,7 +89,7 @@ func InlineSign(keyFilenames ...string) error {
 		if err != nil {
 			return inlineSignErr(err)
 		}
-		if _, err = os.Stdout.WriteString(string(signedMessage) + "\n"); err != nil {
+		if _, err = os.Stdout.Write(append(signedMessage, byte('\n'))); err != nil {
 			return inlineSignErr(err)
 		}
 	}

@@ -35,7 +35,7 @@ func InlineDetach() error {
 		if err != nil {
 			return inlineDetachErr(err)
 		}
-		_, err = os.Stdout.WriteString(string(result.Cleartext()))
+		_, err = os.Stdout.Write(result.Cleartext())
 		if err != nil {
 			return inlineDetachErr(err)
 		}
@@ -48,7 +48,7 @@ func InlineDetach() error {
 		if err != nil {
 			return inlineDetachErr(err)
 		}
-		_, err = os.Stdout.WriteString(string(result.Bytes()))
+		_, err = os.Stdout.Write(result.Bytes())
 		if err != nil {
 			return inlineDetachErr(err)
 		}
