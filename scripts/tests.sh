@@ -169,7 +169,8 @@ $sop inline-verify --verifications-out=$verification $alice_public < $signed > $
 check_exit_code $? 0
 my_cat $verification
 my_cat $verified
-diff $message $verified | my_cat
+diff $message $verified
+check_exit_code $? 0
 
 comm "inline-sign --as=text"
 $sop inline-sign --as=text --with-key-password=$password $alice_secret < $message > $signed
@@ -181,7 +182,21 @@ $sop inline-verify --verifications-out=$verification $alice_public < $signed > $
 check_exit_code $? 0
 my_cat $verification
 my_cat $verified
+diff $message <( tr -d '\r' < $verified )
+check_exit_code $? 0
+
+comm "inline-sign --as=binary"
+$sop inline-sign --as=binary --with-key-password=$password $alice_secret < $message > $signed
+check_exit_code $? 0
+my_cat $signed | my_cat
+
+comm "inline-verify binary"
+$sop inline-verify --verifications-out=$verification $alice_public < $signed > $verified
+check_exit_code $? 0
+my_cat $verification
+my_cat $verified
 diff $message $verified
+check_exit_code $? 0
 
 comm "encrypt --with-password"
 $sop encrypt --with-password=$password --profile=$profileEnc < $message > $encrypted_with_password
