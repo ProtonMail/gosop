@@ -105,6 +105,18 @@ var All = []*cli.Command{
 		},
 	},
 	{
+		Name:      "inline-detach",
+		Usage:     "Split Signatures from an Inline-Signed Message",
+		UsageText: "gosop inline-verify < INLINESIGNED",
+		Flags: []cli.Flag{
+			noArmorFlag,
+			signaturesOutFlag,
+		},
+		Action: func(c *cli.Context) error {
+			return InlineDetach()
+		},
+	},
+	{
 		Name:      "encrypt",
 		Usage:     "Encrypt a Message",
 		UsageText: "gosop encrypt [command options] [CERTS...] < DATA",

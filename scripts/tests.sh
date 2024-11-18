@@ -95,6 +95,7 @@ decrypted_with_password=$data/decrypted_password.txt
 decrypted_with_key=$data/decrypted.txt
 decrypted_with_session_key=$data/decrypted.txt
 unarmored=$data/unarmored.bin
+signatures=$data/signatures.pgp
 
 printf "\nOír la noche inmensa, más inmensa sin ella.\nY el verso cae al alma como al pasto el rocío.\n" > $message
 printf "test.123" > $password
@@ -172,6 +173,26 @@ my_cat $verified
 diff $message $verified
 check_exit_code $? 0
 
+comm "inline-detach clearsigned"
+$sop inline-detach --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message $verified
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
+
+comm "inline-detach --no-armor clearsigned"
+$sop inline-detach --no-armor --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message $verified
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
+
 comm "inline-sign --as=text"
 $sop inline-sign --as=text --with-key-password=$password $alice_secret < $message > $signed
 check_exit_code $? 0
@@ -185,6 +206,26 @@ my_cat $verified
 diff $message <( tr -d '\r' < $verified )
 check_exit_code $? 0
 
+comm "inline-detach text"
+$sop inline-detach --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message <( tr -d '\r' < $verified )
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
+
+comm "inline-detach --no-armor text"
+$sop inline-detach --no-armor --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message <( tr -d '\r' < $verified )
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
+
 comm "inline-sign --as=binary"
 $sop inline-sign --as=binary --with-key-password=$password $alice_secret < $message > $signed
 check_exit_code $? 0
@@ -197,6 +238,26 @@ my_cat $verification
 my_cat $verified
 diff $message $verified
 check_exit_code $? 0
+
+comm "inline-detach binary"
+$sop inline-detach --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message $verified
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
+
+comm "inline-detach --no-armor binary"
+$sop inline-detach --no-armor --signatures-out=$signatures < $signed > $verified
+check_exit_code $? 0
+diff $message $verified
+check_exit_code $? 0
+my_cat $signatures
+$sop verify $signatures $alice_public < $message > $verification
+check_exit_code $? 0
+my_cat $verification
 
 comm "encrypt --with-password"
 $sop encrypt --with-password=$password --profile=$profileEnc < $message > $encrypted_with_password
