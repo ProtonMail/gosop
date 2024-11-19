@@ -3,6 +3,7 @@
 package utils
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	openpgp "github.com/ProtonMail/go-crypto/openpgp/v2"
+	"github.com/ProtonMail/gopenpgp/v3/armor"
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
@@ -105,23 +108,7 @@ func Linebreak() {
 // CollectKeys forms a crypto.KeyRing with all the keys provided in the input
 // files. It returns the keyring and an error.
 func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
-	keyRing, err := crypto.NewKeyRing(nil)
-	if err != nil {
-		return keyRing, err
-	}
-	for _, filename := range keyFilenames {
-		keyData, err := ReadFileOrEnv(filename)
-		if err != nil {
-			return keyRing, err
-		}
-		key, err := crypto.NewKey(keyData)
-		if err != nil {
-			return keyRing, err
-		}
-		if err = keyRing.AddKey(key); err != nil {
-			return nil, err
-		}
-	}
+	keyRing, _, err := CollectKeysPassword([]byte{}, keyFilenames...)
 	return keyRing, err
 }
 
@@ -138,21 +125,35 @@ func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRi
 		if err != nil {
 			return keyRing, false, err
 		}
-		key, err := crypto.NewKey(keyData)
+
+		var entities openpgp.EntityList
+		r, armored := armor.IsPGPArmored(bytes.NewReader(keyData))
+		if armored {
+			entities, err = openpgp.ReadArmoredKeyRing(r)
+		} else {
+			entities, err = openpgp.ReadKeyRing(r)
+		}
 		if err != nil {
 			return keyRing, false, err
 		}
-		locked, err := key.IsLocked()
-		if err == nil && locked {
-			unlockedKey, err := key.Unlock(password)
+
+		for _, entity := range entities {
+			key, err := crypto.NewKeyFromEntity(entity)
 			if err != nil {
-				// unlock failed
-				return nil, true, err
+				return keyRing, false, err
 			}
-			key = unlockedKey
-		}
-		if err = keyRing.AddKey(key); err != nil {
-			return nil, false, err
+			locked, err := key.IsLocked()
+			if err == nil && locked {
+				unlockedKey, err := key.Unlock(password)
+				if err != nil {
+					// unlock failed
+					return nil, true, err
+				}
+				key = unlockedKey
+			}
+			if err = keyRing.AddKey(key); err != nil {
+				return nil, false, err
+			}
 		}
 	}
 	return keyRing, false, err
