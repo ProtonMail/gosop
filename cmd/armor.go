@@ -59,13 +59,21 @@ func armorDecidingType(input []byte) (armored string, err error) {
 		return armorKeys(input, constants.PrivateKeyHeader)
 	}
 	if _, ok := p.(*packet.Signature); ok {
-		armored, err = armor.ArmorPGPSignature(input)
-		if err != nil {
-			return armored, err
+		// If every packet is a signature packet, armor the input as a
+		// signature; otherwise, armor it as a message.
+		for {
+			if p, err = packets.Next(); err == io.EOF {
+				return armor.ArmorPGPSignature(input)
+			}
+			if err != nil {
+				break
+			}
+			if _, ok := p.(*packet.Signature); !ok {
+				break
+			}
 		}
 	}
-	armored, err = armor.ArmorPGPMessage(input)
-	return armored, err
+	return armor.ArmorPGPMessage(input)
 }
 
 func armorKeys(input []byte, armorType string) (armored string, err error) {
