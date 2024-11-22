@@ -89,7 +89,11 @@ func armorKeys(input []byte, armorType string) (armored string, err error) {
 	}
 
 	for _, entity := range entities {
-		err = entity.Serialize(w)
+		if entity.PrivateKey != nil {
+			err = entity.SerializePrivateWithoutSigning(w, &packet.Config{})
+		} else {
+			err = entity.Serialize(w)
+		}
 		if err != nil {
 			return armored, err
 		}
