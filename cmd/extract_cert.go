@@ -45,9 +45,11 @@ func ExtractCert() error {
 		}
 	}
 
-	err = w.Close()
-	if err != nil {
-		return certErr(err)
+	if !noArmor {
+		err = w.Close()
+		if err != nil {
+			return certErr(err)
+		}
 	}
 	_, err = os.Stdout.WriteString("\n")
 	if err != nil {
