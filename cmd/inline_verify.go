@@ -81,7 +81,7 @@ func InlineVerify(input ...string) error {
 }
 
 func writeVerificationToFileFromResult(result *crypto.VerifyResult) error {
-	outputVerFile, err := os.Create(verificationsOut)
+	outputVerFile, err := utils.OpenOutFile(verificationsOut)
 	if err != nil {
 		return err
 	}

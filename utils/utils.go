@@ -189,3 +189,14 @@ func CollectFilesFromCliSlice(data []string) []string {
 	}
 	return result
 }
+
+func OpenOutFile(filename string) (*os.File, error) {
+	if len(filename) > 3 && filename[0:4] == "@FD:" {
+		fd, err := strconv.ParseUint(filename[4:], 10, strconv.IntSize)
+		if err != nil {
+			return nil, err
+		}
+		return os.NewFile(uintptr(fd), filename), nil
+	}
+	return os.Create(filename)
+}

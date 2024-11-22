@@ -154,20 +154,11 @@ func parseSessionKey() (*crypto.SessionKey, error) {
 }
 
 func writeSessionKeyToFile(sk *crypto.SessionKey) error {
-	var sessionKeyFile *os.File
-	if sessionKeyOut[0:4] == "@FD:" {
-		fd, err := strconv.ParseUint(sessionKeyOut[4:], 10, strconv.IntSize)
-		if err != nil {
-			return err
-		}
-		sessionKeyFile = os.NewFile(uintptr(fd), sessionKeyOut)
-	} else {
-		var err error
-		sessionKeyFile, err = os.Create(sessionKeyOut)
-		if err != nil {
-			return err
-		}
+	sessionKeyFile, err := utils.OpenOutFile(sessionKeyOut)
+	if err != nil {
+		return err
 	}
+	defer sessionKeyFile.Close()
 	cipherFunc, err := sk.GetCipherFunc()
 	if err != nil {
 		return decErr(err)
