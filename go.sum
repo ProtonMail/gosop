@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/ProtonMail/go-crypto v1.1.3-0.20241112160648-99debaab3e5c h1:yYJyZaT1NzZoQ/wawayNQ6z1EVvlWkb4+YtJRU/3GOQ=
-github.com/ProtonMail/go-crypto v1.1.3-0.20241112160648-99debaab3e5c/go.mod h1:zNoyBJW3p/yVWiHNZgfTF9VsjwqYof5YY0M9kt2QaX0=
-github.com/ProtonMail/gopenpgp/v3 v3.0.1-0.20241112173804-9aae3e7ba5f0 h1:TTqjmJHYJJqK9VQDtbTaMKHWaaLFUTYCSAcsQmd1cTs=
-github.com/ProtonMail/gopenpgp/v3 v3.0.1-0.20241112173804-9aae3e7ba5f0/go.mod h1:JaPlSl9ATJtH4b63O8T1xn+cYxDwchXwufA+UnVxBkE=
+github.com/ProtonMail/go-crypto v1.1.3-proton h1:NyRhNt1mVmcXJa/YFZE7jWbMS+dzX2lxUJ4rSPWvb6w=
+github.com/ProtonMail/go-crypto v1.1.3-proton/go.mod h1:zNoyBJW3p/yVWiHNZgfTF9VsjwqYof5YY0M9kt2QaX0=
+github.com/ProtonMail/gopenpgp/v3 v3.1.0-proton h1:gy+FWBn4BDXPFN6m3gvFuEXxmBON2iNqCH42DlghH5Q=
+github.com/ProtonMail/gopenpgp/v3 v3.1.0-proton/go.mod h1:bEGyRMt3Md5gjYykLi3o3XWwJ3uERmUBcclZSb/g3nA=
 github.com/cloudflare/circl v1.5.0 h1:hxIWksrX6XN5a1L2TI/h53AGPhNHoUBo+TD1ms9+pys=
 github.com/cloudflare/circl v1.5.0/go.mod h1:uddAzsPgqdMAYatqJ0lsjX1oECcQLIlRpzZh3pJrofs=
 github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d h1:U+s90UTSYgptZMwQh2aRr3LuazLJIa+Pg3Kc1ylSYVY=
