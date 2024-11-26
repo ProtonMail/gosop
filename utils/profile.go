@@ -72,7 +72,7 @@ func createKeyGenerationProfiles() []*SopProfile {
 			pgpProfile:  rfc9580(),
 		},
 		{
-			Name:        "draft-ietf-openpgp-pqc-05",
+			Name:        "pqc",
 			Description: "ML-KEM and ML-DSA",
 			pgpProfile:  pqc(),
 		},
