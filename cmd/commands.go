@@ -69,7 +69,7 @@ var All = []*cli.Command{
 	{
 		Name:      "verify",
 		Usage:     "Verify a Detached Signature",
-		UsageText: "gosop verify SIGNATURE CERTS [CERTS...] < DATA",
+		UsageText: "gosop verify [command options] SIGNATURE CERTS [CERTS...] < DATA",
 		Flags: []cli.Flag{
 			notBeforeFlag,
 			notAfterFlag,
@@ -94,7 +94,7 @@ var All = []*cli.Command{
 	{
 		Name:      "inline-verify",
 		Usage:     "Verify an Inline-Signed Message",
-		UsageText: "gosop inline-verify CERTS [CERTS...] < INLINESIGNED",
+		UsageText: "gosop inline-verify [command options] CERTS [CERTS...] < INLINESIGNED",
 		Flags: []cli.Flag{
 			notBeforeFlag,
 			notAfterFlag,
@@ -107,7 +107,7 @@ var All = []*cli.Command{
 	{
 		Name:      "inline-detach",
 		Usage:     "Split Signatures from an Inline-Signed Message",
-		UsageText: "gosop inline-verify < INLINESIGNED",
+		UsageText: "gosop inline-detach [command options] < INLINESIGNED",
 		Flags: []cli.Flag{
 			noArmorFlag,
 			signaturesOutFlag,
