@@ -16,6 +16,19 @@ implementations. For more information, please refer to the
 [specification](https://tools.ietf.org/html/draft-dkg-openpgp-stateless-cli-01).
 
 ### Install
+
+#### Instantly run gosop with x-cmd
+
+[x-cmd](https://www.x-cmd.com) is a lightweight cross-platform package manager implemented in posix shell. Quickly download and execute `gosop` with a single command: [x gosop](https://www.x-cmd.com/pkg/gosop)
+
+You can also install `gosop` in the user level without requiring root privileges.
+
+```
+x env use gosop
+```
+
+#### Build from source
+
 ```
 mkdir -p $GOPATH/src/github.com/ProtonMail/
 cd $GOPATH/src/github.com/ProtonMail/
