@@ -1,14 +1,16 @@
 package cmd
 
 import (
-	"bytes"
 	"io"
+	"bufio"
 	"os"
-	"unicode/utf8"
+	"unicode"
 
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
+
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -57,15 +59,9 @@ func Encrypt(keyFilenames ...string) error {
 
 	if asType == textOpt {
 		builder.Utf8()
-		// Expensive check
-		var plaintextBytes []byte
-		if plaintextBytes, err = io.ReadAll(input); err != nil {
-			return encErr(err)
+		input = &checkUtf8Reader{
+			input: *bufio.NewReader(input),
 		}
-		if !utf8.Valid(plaintextBytes) {
-			return Err53
-		}
-		input = bytes.NewReader(plaintextBytes)
 	}
 
 	// Password encrypt
@@ -108,6 +104,37 @@ func Encrypt(keyFilenames ...string) error {
 	return err
 }
 
+// checkUtf8Reader checks whether the input is valid UTF-8, and exits
+// with an error if not.
+type checkUtf8Reader struct {
+	input bufio.Reader
+}
+
+func (cr *checkUtf8Reader) Read(buf []byte) (n int, err error) {
+	for n + 4 < len(buf) { // Space for at least one more rune
+		r, size, err := cr.input.ReadRune()
+		if err != nil {
+			return n, err
+		}
+		if r == unicode.ReplacementChar && size == 1 { // Invalid rune
+			return n, Err53
+		}
+		err = cr.input.UnreadRune()
+		if err != nil {
+			return n, err
+		}
+		bytesRead, err := cr.input.Read(buf[n:n+size])
+		n += bytesRead
+		if err != nil {
+			return n, err
+		}
+	}
+	return
+}
+
 func encErr(err error) error {
+	if ec, ok := err.(cli.ExitCoder); ok {
+		return ec
+	}
 	return Err99("encrypt", err)
 }
