@@ -87,10 +87,16 @@ func createKeyGenerationProfiles() []*SopProfile {
 			SecurityLevel: constants.HighSecurity,
 		},
 		{
-			Names:         []string{"draft-ietf-openpgp-pqc-05"},
-			Description:   "ML-KEM and ML-DSA",
+			Names:         []string{"draft-ietf-openpgp-pqc-09"},
+			Description:   "ML-KEM-768 and ML-DSA-65",
 			PgpProfile:    profile.PQC(),
 			SecurityLevel: constants.StandardSecurity,
+		},
+		{
+			Names:         []string{"draft-ietf-openpgp-pqc-09-high-security"},
+			Description:   "ML-KEM-1024 and ML-DSA-87",
+			PgpProfile:    profile.PQC(),
+			SecurityLevel: constants.HighSecurity,
 		},
 		{
 			Names:         []string{"draft-ietf-openpgp-persistent-symmetric-keys-00"},
