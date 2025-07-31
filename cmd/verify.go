@@ -2,7 +2,10 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
 	"os"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 	"github.com/ProtonMail/gosop/utils"
@@ -11,15 +14,23 @@ import (
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
-// Verify checks the validity of a signature against a set of certificates.
-func Verify(input ...string) error {
-	switch len(input) {
+func BeforeVerify(c *cli.Context) error {
+	switch c.Args().Len() {
 	case 0:
 		return Err3
 	case 1:
-		println("Please provide a certificate (public key)")
+		fmt.Fprintln(os.Stderr, "Please provide a certificate (public key)")
 		return Err19
 	}
+	_, _, err := utils.ParseDates(notBefore, notAfter)
+	if err != nil {
+		return verErr(err)
+	}
+	return nil
+}
+
+// Verify checks the validity of a signature against a set of certificates.
+func Verify(input ...string) error {
 	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
 	if err != nil {
 		return verErr(err)

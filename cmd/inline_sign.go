@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"unicode/utf8"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -14,14 +17,20 @@ const (
 	clearsignedOpt = "clearsigned"
 )
 
+func BeforeInlineSign(c *cli.Context) error {
+	if !c.Args().Present() {
+		fmt.Fprintln(os.Stderr, "Please provide keys to create detached signature")
+		return Err19
+	}
+	if noArmor && asType == clearsignedOpt {
+		return Err83
+	}
+	return nil
+}
+
 // InlineSign takes the data from stdin and signs it with the key passed as argument.
 // TODO: Exactly one signature should be made by each supplied "KEY".
 func InlineSign(keyFilenames ...string) error {
-	if len(keyFilenames) == 0 {
-		println("Please provide keys to create detached signature")
-		return Err19
-	}
-
 	// Signer keyring
 	var keyRing *crypto.KeyRing
 	var err error
@@ -54,10 +63,6 @@ func InlineSign(keyFilenames ...string) error {
 
 	if (asType == clearsignedOpt || asType == textOpt) && !utf8.Valid(messageBytes) {
 		return Err53
-	}
-
-	if noArmor && asType == clearsignedOpt {
-		return Err83
 	}
 
 	encoding := crypto.Armor

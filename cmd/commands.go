@@ -2,6 +2,8 @@
 package cmd
 
 import (
+	"io"
+
 	"github.com/urfave/cli/v2"
 )
 
@@ -25,6 +27,7 @@ var All = []*cli.Command{
 		Usage:     "List profiles for subcommands",
 		UsageText: "gosop list-profiles SUBCOMMAND",
 		Flags:     []cli.Flag{},
+		Before: BeforeListProfiles,
 		Action: func(c *cli.Context) error {
 			return ListProfiles(c.Args().Slice()...)
 		},
@@ -39,6 +42,7 @@ var All = []*cli.Command{
 			keyPasswordFlag,
 			signingOnlyFlag,
 		},
+		Before: BeforeGenerateKey,
 		Action: func(c *cli.Context) error {
 			return GenerateKey(c.Args().Slice()...)
 		},
@@ -63,6 +67,7 @@ var All = []*cli.Command{
 			asFlag,
 			keyPasswordFlag,
 		},
+		Before: BeforeSign,
 		Action: func(c *cli.Context) error {
 			return Sign(c.Args().Slice()...)
 		},
@@ -75,6 +80,7 @@ var All = []*cli.Command{
 			notBeforeFlag,
 			notAfterFlag,
 		},
+		Before: BeforeVerify,
 		Action: func(c *cli.Context) error {
 			return Verify(c.Args().Slice()...)
 		},
@@ -88,6 +94,7 @@ var All = []*cli.Command{
 			asSignedFlag,
 			keyPasswordFlag,
 		},
+		Before: BeforeInlineSign,
 		Action: func(c *cli.Context) error {
 			return InlineSign(c.Args().Slice()...)
 		},
@@ -101,6 +108,7 @@ var All = []*cli.Command{
 			notAfterFlag,
 			verificationsOutFlag,
 		},
+		Before: BeforeInlineVerify,
 		Action: func(c *cli.Context) error {
 			return InlineVerify(c.Args().Slice()...)
 		},
@@ -129,6 +137,7 @@ var All = []*cli.Command{
 			signWithFlag,
 			keyPasswordFlag,
 		},
+		Before: BeforeEncrypt,
 		Action: func(c *cli.Context) error {
 			return Encrypt(c.Args().Slice()...)
 		},
@@ -147,6 +156,7 @@ var All = []*cli.Command{
 			verifyNotAfterFlag,
 			keyPasswordFlag,
 		},
+		Before: BeforeDecrypt,
 		Action: func(c *cli.Context) error {
 			return Decrypt(c.Args().Slice()...)
 		},
@@ -165,6 +175,22 @@ var All = []*cli.Command{
 		UsageText: "gosop dearmor < DATA",
 		Action: func(c *cli.Context) error {
 			return DearmorComm()
+		},
+	},
+	{
+		Name:      "supports",
+		Usage:     "Check whether gosop supports the given subcommand and options",
+		UsageText: "gosop supports COMMAND",
+		Action: func(c *cli.Context) error {
+			for _, c := range c.App.Commands {
+				c.Action = func(ctx *cli.Context) error {
+					return nil // Don't run the actual action.
+				}
+			}
+			c.App.Writer = io.Discard // Discard help text.
+			args := []string{"gosop"}
+			args = append(args, c.Args().Slice()...)
+			return c.App.Run(args)
 		},
 	},
 }

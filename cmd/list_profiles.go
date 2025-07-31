@@ -4,16 +4,27 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/urfave/cli/v2"
+
 	"github.com/ProtonMail/gosop/utils"
 )
 
 const encryptCommand = "encrypt"
 const keyGenCommand = "generate-key"
 
-func ListProfiles(commands ...string) error {
-	if len(commands) < 1 {
+func BeforeListProfiles(c *cli.Context) error {
+	if !c.Args().Present() {
 		return Err89
 	}
+	switch c.Args().First() {
+	case keyGenCommand, encryptCommand:
+		return nil
+	default:
+		return Err89
+	}
+}
+
+func ListProfiles(commands ...string) error {
 	command := commands[0]
 	switch command {
 	case keyGenCommand:

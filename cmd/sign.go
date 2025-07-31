@@ -1,21 +1,28 @@
 package cmd
 
 import (
+	"fmt"
 	"io"
 	"os"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
+func BeforeSign(c *cli.Context) error {
+	if !c.Args().Present() {
+		fmt.Fprintln(os.Stderr, "Please provide keys to create detached signature")
+		return Err19
+	}
+	return nil
+}
+
 // Sign takes the data from stdin and signs it with the key passed as argument.
 // TODO: Exactly one signature will be made by each supplied "KEY".
 func Sign(keyFilenames ...string) error {
-	if len(keyFilenames) == 0 {
-		println("Please provide keys to create detached signature")
-		return Err19
-	}
 	pgp := crypto.PGP()
 
 	// Signer keyring

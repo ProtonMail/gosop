@@ -1,22 +1,28 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
 )
 
-// InlineVerify checks the validity of a signed message against a set of certificates.
-func InlineVerify(input ...string) error {
-	if len(input) == 0 {
-		println("Please provide a certificate (public key)")
+func BeforeInlineVerify(c *cli.Context) error {
+	if !c.Args().Present() {
+		fmt.Fprintln(os.Stderr, "Please provide a certificate (public key)")
 		return Err19
 	}
+	return nil
+}
 
+// InlineVerify checks the validity of a signed message against a set of certificates.
+func InlineVerify(input ...string) error {
 	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
 	if err != nil {
 		return inlineVerErr(err)

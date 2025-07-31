@@ -1,8 +1,9 @@
 package cmd
 
 import (
-	"io"
 	"bufio"
+	"fmt"
+	"io"
 	"os"
 	"unicode"
 
@@ -17,15 +18,27 @@ const (
 	textOpt = "text"
 )
 
+func BeforeEncrypt(c *cli.Context) error {
+	if !c.Args().Present() && password == "" {
+		fmt.Fprintln(os.Stderr, "Please provide encryption keys or passphrase (--with-password).")
+		return Err19
+	}
+	if c.Args().Present() && password != "" {
+		fmt.Fprintln(os.Stderr, "Can't encrypt with both keys and passphrase.")
+		return Err37
+	}
+	profile := utils.SelectEncryptionProfile(selectedProfile)
+	if profile == nil {
+		return Err89
+	}
+	return nil
+}
+
 // Encrypt takes the data from stdin and encrypts it with the keys passed as
 // argument, or a passphrase passed with the --with-password flag. It signs
 // with the given private keys.
 // Note: Can't encrypt both symmetrically (passphrase) and keys.
 func Encrypt(keyFilenames ...string) error {
-	if len(keyFilenames) == 0 && password == "" {
-		println("Please provide recipients and/or passphrase (--with-password)")
-		return Err19
-	}
 	profile := utils.SelectEncryptionProfile(selectedProfile)
 	if profile == nil {
 		return Err89

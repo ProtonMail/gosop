@@ -3,10 +3,13 @@ package cmd
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -24,17 +27,27 @@ var symKeyAlgos = map[packet.CipherFunction]string{
 	packet.CipherAES256: constants.AES256,
 }
 
+func BeforeDecrypt(c *cli.Context) error {
+	if !c.Args().Present() && password == "" && sessionKey == "" {
+		fmt.Fprintln(os.Stderr, "Please provide decryption keys, passphrase, or session key.")
+		return Err19
+	}
+	if c.Args().Present() && password != "" ||
+		c.Args().Present() && sessionKey != "" ||
+		password != "" && sessionKey != "" {
+		fmt.Fprintln(os.Stderr, "Can't decrypt with more than one of keys, passphrase and session key.")
+		return Err37
+	}
+	return nil
+}
+
 // Decrypt takes the data from stdin and decrypts it with the key file passed as
 // argument, or a passphrase in a file passed with the --with-password flag.
-// Note: Can't encrypt both symmetrically (passphrase) and keys.
+// Note: Can't decrypt with more than one of keys, passphrase and session key.
 // TODO: Multiple signers?
 //
 // --session-key-out=file flag: Outputs session key byte stream to given file.
 func Decrypt(keyFilenames ...string) error {
-	if len(keyFilenames) == 0 && password == "" && sessionKey == "" {
-		println("Please provide decryption keys, session key, or passphrase")
-		return Err69
-	}
 	var err error
 
 	pgp := crypto.PGP()

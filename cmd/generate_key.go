@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/ProtonMail/gosop/utils"
 
@@ -10,6 +13,28 @@ import (
 
 	"github.com/ProtonMail/go-crypto/openpgp/v2"
 )
+
+func BeforeGenerateKey(c *cli.Context) error {
+	profile := utils.SelectKeyGenerationProfile(selectedProfile)
+	if profile == nil {
+		return Err89
+	}
+	if !profile.PgpProfile.V6 && !c.Args().Present() {
+		fmt.Fprintln(os.Stderr, "Non-v6 key requires a User ID.")
+		return Err19
+	}
+	for _, userID := range c.Args().Slice() {
+		_, comment, _, err := utils.ParseUserID(userID)
+		if err != nil {
+			return kgErr(err)
+		}
+		if comment != "" {
+			fmt.Fprintln(os.Stderr, "Comments in User IDs are not supported.")
+			return Err37
+		}
+	}
+	return nil
+}
 
 // GenerateKey creates a single default OpenPGP certificate with zero or more
 // User IDs. Given that go-crypto expects name, comment, email parameters, we
