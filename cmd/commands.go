@@ -37,6 +37,7 @@ var All = []*cli.Command{
 			noArmorFlag,
 			selectedProfileFlag,
 			keyPasswordFlag,
+			signingOnlyFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return GenerateKey(c.Args().Slice()...)

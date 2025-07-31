@@ -24,6 +24,7 @@ var (
 	verifyWith       cli.StringSlice
 	selectedProfile  string
 	keyPassword      string
+	signingOnly      bool
 )
 
 // All possible flags for commands
@@ -136,5 +137,10 @@ var (
 		Name:        "with-key-password",
 		Usage:       "--with-key-password=PASSWORD",
 		Destination: &keyPassword,
+	}
+	signingOnlyFlag = &cli.BoolFlag{
+		Name:        "signing-only",
+		Value:       false,
+		Destination: &signingOnly,
 	}
 )

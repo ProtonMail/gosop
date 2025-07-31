@@ -7,6 +7,8 @@ import (
 	"github.com/ProtonMail/gosop/utils"
 
 	"github.com/ProtonMail/gopenpgp/v3/crypto"
+
+	"github.com/ProtonMail/go-crypto/openpgp/v2"
 )
 
 // GenerateKey creates a single default OpenPGP certificate with zero or more
@@ -34,6 +36,11 @@ func GenerateKey(userIDs ...string) error {
 		return kgErr(err)
 	}
 	defer key.ClearPrivateParams()
+
+	if signingOnly {
+		// Remove the encryption subkey
+		key.GetEntity().Subkeys = []v2.Subkey{}
+	}
 
 	// Lock key if required
 	if keyPassword != "" {
