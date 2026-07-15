@@ -26,8 +26,19 @@ func Verify(input ...string) error {
 	}
 	pgp := crypto.PGP()
 
+	var pw []byte
+	if keyPassword != "" {
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
+		if err != nil {
+			return encErr(err)
+		}
+	}
+
 	// Collect keyring
-	keyRing, err := utils.CollectKeys(input[1:]...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, input[1:]...)
+	if failUnlock {
+		return Err67
+	}
 	if err != nil {
 		return verErr(err)
 	}
