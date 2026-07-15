@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"io"
 	"os"
 
@@ -38,11 +39,19 @@ func ExtractCert() error {
 		}
 	}
 
+	nonPSKFound := false
 	for _, entity := range entities {
+		if entity.PSK != nil {
+			continue
+		}
+		nonPSKFound = true
 		err = entity.Serialize(w)
 		if err != nil {
 			return certErr(err)
 		}
+	}
+	if !nonPSKFound { // Only persistent symmetric keys in input
+		return certErr(errors.New("can't extract cert from persistent symmetric key"))
 	}
 
 	if !noArmor {
