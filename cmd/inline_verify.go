@@ -23,8 +23,19 @@ func InlineVerify(input ...string) error {
 	}
 	pgp := crypto.PGP()
 
+	var pw []byte
+	if keyPassword != "" {
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
+		if err != nil {
+			return encErr(err)
+		}
+	}
+
 	// Collect keyring
-	keyRing, err := utils.CollectKeys(input...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, input...)
+	if failUnlock {
+		return Err67
+	}
 	if err != nil {
 		return inlineVerErr(err)
 	}

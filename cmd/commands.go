@@ -73,6 +73,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			notBeforeFlag,
 			notAfterFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return Verify(c.Args().Slice()...)
@@ -99,6 +100,7 @@ var All = []*cli.Command{
 			notBeforeFlag,
 			notAfterFlag,
 			verificationsOutFlag,
+			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
 			return InlineVerify(c.Args().Slice()...)

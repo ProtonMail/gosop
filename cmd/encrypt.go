@@ -35,16 +35,17 @@ func Encrypt(keyFilenames ...string) error {
 	var err error
 	var input io.Reader = os.Stdin
 
+	var pw []byte
+	if keyPassword != "" {
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
+		if err != nil {
+			return encErr(err)
+		}
+	}
+
 	if signWith.Value() != nil {
 		// GopenPGP signs automatically if an unlocked private key is passed.
 		var privKeyRing *crypto.KeyRing
-		var pw []byte
-		if keyPassword != "" {
-			pw, err = utils.ReadSanitizedPassword(keyPassword)
-			if err != nil {
-				return encErr(err)
-			}
-		}
 		keys := utils.CollectFilesFromCliSlice(signWith.Value())
 		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keys...)
 		if failUnlock {
@@ -72,7 +73,10 @@ func Encrypt(keyFilenames ...string) error {
 		}
 		builder.Password(pw)
 	} else {
-		pubKeyRing, err := utils.CollectKeys(keyFilenames...)
+		pubKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+		if failUnlock {
+			return Err67
+		}
 		if err != nil {
 			return encErr(err)
 		}
