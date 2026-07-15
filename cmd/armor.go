@@ -58,6 +58,9 @@ func armorDecidingType(input []byte) (armored string, err error) {
 	if _, ok := p.(*packet.PrivateKey); ok {
 		return armorKeys(input, constants.PrivateKeyHeader)
 	}
+	if _, ok := p.(*packet.PersistentSymmetricKey); ok {
+		return armorKeys(input, constants.PrivateKeyHeader)
+	}
 	if _, ok := p.(*packet.Signature); ok {
 		// If every packet is a signature packet, armor the input as a
 		// signature; otherwise, armor it as a message.
