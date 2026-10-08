@@ -81,12 +81,15 @@ func writeVerificationToOutput(out *os.File, result *crypto.VerifyResult) error 
 			mode = "mode:binary"
 		}
 		creationTime := signature.Signature.CreationTime
-		fingerprintSign := signature.SignedBy.GetFingerprintBytes()
-		fingerprintPrimarySign := signature.SignedBy.GetFingerprintBytes()
+		issuerFingerprint := signature.Signature.IssuerFingerprint
+		if issuerFingerprint == nil {
+			issuerFingerprint = signature.SignedBy.GetFingerprintBytes()
+		}
+		issuerPrimaryFingerprint := signature.SignedBy.GetFingerprintBytes()
 		ver = utils.VerificationString(
 			creationTime,
-			fingerprintSign,
-			fingerprintPrimarySign,
+			issuerFingerprint,
+			issuerPrimaryFingerprint,
 			mode,
 		)
 		if _, err := out.WriteString(ver + "\n"); err != nil {
