@@ -108,14 +108,16 @@ func Linebreak() {
 // CollectKeys forms a crypto.KeyRing with all the keys provided in the input
 // files. It returns the keyring and an error.
 func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
-	keyRing, _, err := CollectKeysPassword([]byte{}, keyFilenames...)
+	keyRing, _, err := CollectKeysPassword(false, []byte{}, keyFilenames...)
 	return keyRing, err
 }
 
-// CollectKeysPassword forms a crypto.KeyRing with all the keys provided in the input
-// files and tries to unlock them with password if locked. It returns the keyring,
-// a bool indicating an unlock issue, and an error.
-func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRing, bool, error) {
+// CollectKeysPassword forms a crypto.KeyRing with either (1) all the keys
+// provided in the inputs if `oneKeyPerFile` is false, or (2) one of the keys
+// provided in each input if `oneKeyPerFile is true; and tries to unlock them
+// with the password if locked. It returns the keyring, a bool indicating an
+// unlock issue, and possibly an error.
+func CollectKeysPassword(oneKeyPerFile bool, password []byte, keyFilenames ...string) (*crypto.KeyRing, bool, error) {
 	keyRing, err := crypto.NewKeyRing(nil)
 	if err != nil {
 		return keyRing, false, err
@@ -153,6 +155,9 @@ func CollectKeysPassword(password []byte, keyFilenames ...string) (*crypto.KeyRi
 			}
 			if err = keyRing.AddKey(key); err != nil {
 				return nil, false, err
+			}
+			if oneKeyPerFile {
+				break
 			}
 		}
 	}

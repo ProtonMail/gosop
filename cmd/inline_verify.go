@@ -32,7 +32,7 @@ func InlineVerify(input ...string) error {
 	}
 
 	// Collect keyring
-	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, input...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, input...)
 	if failUnlock {
 		return Err67
 	}

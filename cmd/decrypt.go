@@ -81,7 +81,7 @@ func Decrypt(keyFilenames ...string) error {
 				return decErr(err)
 			}
 		}
-		privKeyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, keyFilenames...)
 		if failUnlock {
 			return Err67
 		}

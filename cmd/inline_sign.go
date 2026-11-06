@@ -32,7 +32,7 @@ func InlineSign(keyFilenames ...string) error {
 			return inlineSignErr(err)
 		}
 	}
-	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, keyFilenames...)
 	if failUnlock {
 		return Err67
 	}

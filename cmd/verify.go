@@ -35,7 +35,7 @@ func Verify(input ...string) error {
 	}
 
 	// Collect keyring
-	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, input[1:]...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, input[1:]...)
 	if failUnlock {
 		return Err67
 	}

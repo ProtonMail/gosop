@@ -28,7 +28,7 @@ func Sign(keyFilenames ...string) error {
 			return signErr(err)
 		}
 	}
-	keyRing, failUnlock, err := utils.CollectKeysPassword(pw, keyFilenames...)
+	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, keyFilenames...)
 	if failUnlock {
 		return Err67
 	}
