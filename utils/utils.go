@@ -160,6 +160,9 @@ func CollectKeysPassword(oneKeyPerFile bool, password []byte, keyFilenames ...st
 				break
 			}
 		}
+		if oneKeyPerFile && len(entities) > 1 {
+			fmt.Fprintln(os.Stderr, "Warning: ignoring additional keys and using only the first one")
+		}
 	}
 	return keyRing, false, err
 }
