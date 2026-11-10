@@ -22,7 +22,7 @@ const (
 // with the given private keys.
 // Note: Can't encrypt both symmetrically (passphrase) and keys.
 func Encrypt(keyFilenames ...string) error {
-	if len(keyFilenames) == 0 && password == "" {
+	if len(keyFilenames) == 0 && len(key.Value()) == 0 && password == "" {
 		println("Please provide recipients and/or passphrase (--with-password)")
 		return Err19
 	}
@@ -73,14 +73,23 @@ func Encrypt(keyFilenames ...string) error {
 		}
 		builder.Password(pw)
 	} else {
-		pubKeyRing, failUnlock, err := utils.CollectKeysPassword(true, pw, keyFilenames...)
-		if failUnlock {
-			return Err67
-		}
+		pubKeyRing, err := utils.CollectKeys(true, keyFilenames...)
 		if err != nil {
 			return encErr(err)
 		}
 		builder.Recipients(pubKeyRing)
+		if key.Value() != nil {
+			privKeyRing, failUnlock, err := utils.CollectKeysPassword(true, pw, key.Value()...)
+			if failUnlock {
+				return Err67
+			}
+			if err != nil {
+				return encErr(err)
+			}
+			for _, privKey := range privKeyRing.GetKeys() {
+				builder.Recipient(privKey)
+			}
+		}
 	}
 
 	encoding := crypto.Armor

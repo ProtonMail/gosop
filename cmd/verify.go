@@ -17,34 +17,49 @@ func Verify(input ...string) error {
 	case 0:
 		return Err3
 	case 1:
-		println("Please provide a certificate (public key)")
-		return Err19
+		if len(key.Value()) == 0 {
+			println("Please provide a certificate or key (--with-key)")
+			return Err19
+		}
 	}
 	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
 	if err != nil {
 		return verErr(err)
 	}
 	pgp := crypto.PGP()
-
-	var pw []byte
-	if keyPassword != "" {
-		pw, err = utils.ReadSanitizedPassword(keyPassword)
-		if err != nil {
-			return encErr(err)
-		}
-	}
+	builder := pgp.Verify()
 
 	// Collect keyring
-	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, input[1:]...)
-	if failUnlock {
-		return Err67
-	}
+	keyRing, err := utils.CollectKeys(false, input[1:]...)
 	if err != nil {
 		return verErr(err)
 	}
-	verifier, _ := pgp.Verify().
-		VerificationKeys(keyRing).
-		New()
+	builder.VerificationKeys(keyRing)
+	if key.Value() != nil {
+		var pw []byte
+		if keyPassword != "" {
+			pw, err = utils.ReadSanitizedPassword(keyPassword)
+			if err != nil {
+				return verErr(err)
+			}
+		}
+
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, key.Value()...)
+		if failUnlock {
+			return Err67
+		}
+		if err != nil {
+			return verErr(err)
+		}
+		for _, privKey := range privKeyRing.GetKeys() {
+			builder.VerificationKey(privKey)
+		}
+	}
+
+	verifier, err := builder.New()
+	if err != nil {
+		return verErr(err)
+	}
 
 	// Collect signature
 	sigBytes, err := utils.ReadFileOrEnv(input[0])

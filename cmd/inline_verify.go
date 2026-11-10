@@ -12,8 +12,8 @@ import (
 
 // InlineVerify checks the validity of a signed message against a set of certificates.
 func InlineVerify(input ...string) error {
-	if len(input) == 0 {
-		println("Please provide a certificate (public key)")
+	if len(input) == 0 && len(key.Value()) == 0 {
+		println("Please provide a certificate or key (--with-key)")
 		return Err19
 	}
 
@@ -22,25 +22,39 @@ func InlineVerify(input ...string) error {
 		return inlineVerErr(err)
 	}
 	pgp := crypto.PGP()
-
-	var pw []byte
-	if keyPassword != "" {
-		pw, err = utils.ReadSanitizedPassword(keyPassword)
-		if err != nil {
-			return encErr(err)
-		}
-	}
+	builder := pgp.Verify()
 
 	// Collect keyring
-	keyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, input...)
-	if failUnlock {
-		return Err67
-	}
+	keyRing, err := utils.CollectKeys(false, input...)
 	if err != nil {
 		return inlineVerErr(err)
 	}
-	builder := pgp.Verify().
-		VerificationKeys(keyRing)
+	builder.VerificationKeys(keyRing)
+	if key.Value() != nil {
+		var pw []byte
+		if keyPassword != "" {
+			pw, err = utils.ReadSanitizedPassword(keyPassword)
+			if err != nil {
+				return inlineVerErr(err)
+			}
+		}
+
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, key.Value()...)
+		if failUnlock {
+			return Err67
+		}
+		if err != nil {
+			return inlineVerErr(err)
+		}
+		for _, privKey := range privKeyRing.GetKeys() {
+			builder.VerificationKey(privKey)
+		}
+	}
+
+	verifier, err := builder.New()
+	if err != nil {
+		return inlineVerErr(err)
+	}
 
 	signatureBytes, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
@@ -50,7 +64,6 @@ func InlineVerify(input ...string) error {
 	signature := string(signatureBytes)
 	if strings.HasPrefix(signature, "-----BEGIN PGP SIGNED MESSAGE-----") {
 		// handle cleartext
-		verifier, _ := builder.New()
 		result, err := verifier.VerifyCleartext(signatureBytes)
 		if err != nil {
 			return inlineVerErr(err)
@@ -69,7 +82,6 @@ func InlineVerify(input ...string) error {
 			}
 		}
 	} else {
-		verifier, _ := builder.New()
 		result, err := verifier.VerifyInline(signatureBytes, crypto.Auto)
 		if err != nil {
 			return inlineVerErr(err)

@@ -105,18 +105,20 @@ func Linebreak() {
 	}
 }
 
-// CollectKeys forms a crypto.KeyRing with all the keys provided in the input
-// files. It returns the keyring and an error.
-func CollectKeys(keyFilenames ...string) (*crypto.KeyRing, error) {
-	keyRing, _, err := CollectKeysPassword(false, []byte{}, keyFilenames...)
+// CollectKeys forms a crypto.KeyRing with either (1) all the keys
+// provided in the inputs if `oneKeyPerFile` is false, or (2) one of the keys
+// provided in each input if `oneKeyPerFile is true.
+func CollectKeys(oneKeyPerFile bool, keyFilenames ...string) (*crypto.KeyRing, error) {
+	keyRing, _, err := CollectKeysPassword(oneKeyPerFile, nil, keyFilenames...)
 	return keyRing, err
 }
 
 // CollectKeysPassword forms a crypto.KeyRing with either (1) all the keys
 // provided in the inputs if `oneKeyPerFile` is false, or (2) one of the keys
 // provided in each input if `oneKeyPerFile is true; and tries to unlock them
-// with the password if locked. It returns the keyring, a bool indicating an
-// unlock issue, and possibly an error.
+// with the password if a password is passed (returning an error if the key
+// is not locked). It returns the keyring, a bool indicating an unlock issue,
+// and possibly an error.
 func CollectKeysPassword(oneKeyPerFile bool, password []byte, keyFilenames ...string) (*crypto.KeyRing, bool, error) {
 	keyRing, err := crypto.NewKeyRing(nil)
 	if err != nil {
@@ -144,8 +146,7 @@ func CollectKeysPassword(oneKeyPerFile bool, password []byte, keyFilenames ...st
 			if err != nil {
 				return keyRing, false, err
 			}
-			locked, err := key.IsLocked()
-			if err == nil && locked {
+			if password != nil {
 				unlockedKey, err := key.Unlock(password)
 				if err != nil {
 					// unlock failed

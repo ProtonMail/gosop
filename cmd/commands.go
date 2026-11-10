@@ -74,6 +74,7 @@ var All = []*cli.Command{
 		Flags: []cli.Flag{
 			notBeforeFlag,
 			notAfterFlag,
+			withKeyFlag,
 			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
@@ -101,6 +102,7 @@ var All = []*cli.Command{
 			notBeforeFlag,
 			notAfterFlag,
 			verificationsOutFlag,
+			withKeyFlag,
 			keyPasswordFlag,
 		},
 		Action: func(c *cli.Context) error {
@@ -128,6 +130,7 @@ var All = []*cli.Command{
 			asFlag,
 			noArmorFlag,
 			passwordFlag,
+			withKeyFlag,
 			signWithFlag,
 			keyPasswordFlag,
 		},
@@ -145,6 +148,7 @@ var All = []*cli.Command{
 			passwordFlag,
 			verificationsOutFlag,
 			verifyWithFlag,
+			verifyWithKeyFlag,
 			verifyNotBeforeFlag,
 			verifyNotAfterFlag,
 			keyPasswordFlag,

@@ -35,23 +35,46 @@ func Decrypt(keyFilenames ...string) error {
 		println("Please provide decryption keys, session key, or passphrase")
 		return Err69
 	}
+	if (verificationsOut == "" && (verifyWith.Value() != nil || verifyWithKey.Value() != nil)) ||
+		(verificationsOut != "" && verifyWith.Value() == nil && verifyWithKey.Value() == nil) {
+		return Err23
+	}
+
 	var err error
 
 	pgp := crypto.PGP()
 	builder := pgp.Decryption()
 
-	var pubKeyRing *crypto.KeyRing
-	if verifyWith.Value() != nil {
-		verifyKeys := utils.CollectFilesFromCliSlice(verifyWith.Value())
-		pubKeyRing, err = utils.CollectKeys(verifyKeys...)
+	var pw []byte
+	if keyPassword != "" {
+		pw, err = utils.ReadSanitizedPassword(keyPassword)
 		if err != nil {
 			return decErr(err)
 		}
-		builder.VerificationKeys(pubKeyRing)
 	}
-	if (verificationsOut == "" && pubKeyRing.CountEntities() != 0) ||
-		(verificationsOut != "" && pubKeyRing.CountEntities() == 0) {
-		return Err23
+
+	var pubKeyRing *crypto.KeyRing
+	if verifyWith.Value() != nil {
+		verifyKeys := utils.CollectFilesFromCliSlice(verifyWith.Value())
+		pubKeyRing, err = utils.CollectKeys(false, verifyKeys...)
+		if err != nil {
+			return decErr(err)
+		}
+		for _, pubKey := range pubKeyRing.GetKeys() {
+			builder.VerificationKey(pubKey)
+		}
+	}
+	if verifyWithKey.Value() != nil {
+		privKeyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, verifyWithKey.Value()...)
+		if failUnlock {
+			return Err67
+		}
+		if err != nil {
+			return decErr(err)
+		}
+		for _, privKey := range privKeyRing.GetKeys() {
+			builder.VerificationKey(privKey)
+		}
 	}
 
 	timeFrom, timeTo, err := utils.ParseDates(notBefore, notAfter)
@@ -74,13 +97,6 @@ func Decrypt(keyFilenames ...string) error {
 		pw = []byte(strings.TrimSpace(string(pw)))
 		builder.Password(pw)
 	} else {
-		var pw []byte
-		if keyPassword != "" {
-			pw, err = utils.ReadSanitizedPassword(keyPassword)
-			if err != nil {
-				return decErr(err)
-			}
-		}
 		privKeyRing, failUnlock, err := utils.CollectKeysPassword(false, pw, keyFilenames...)
 		if failUnlock {
 			return Err67
