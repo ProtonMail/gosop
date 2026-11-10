@@ -191,14 +191,6 @@ func ReadSanitizedPassword(filename string) ([]byte, error) {
 	return pw, nil
 }
 
-func CollectFilesFromCliSlice(data []string) []string {
-	result := []string{}
-	for _, value := range data {
-		result = append(result, strings.Split(value, " ")...)
-	}
-	return result
-}
-
 func OpenOutFile(filename string) (*os.File, error) {
 	if len(filename) > 3 && filename[0:4] == "@FD:" {
 		fd, err := strconv.ParseUint(filename[4:], 10, strconv.IntSize)

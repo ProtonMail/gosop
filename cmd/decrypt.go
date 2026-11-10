@@ -55,8 +55,7 @@ func Decrypt(keyFilenames ...string) error {
 
 	var pubKeyRing *crypto.KeyRing
 	if verifyWith.Value() != nil {
-		verifyKeys := utils.CollectFilesFromCliSlice(verifyWith.Value())
-		pubKeyRing, err = utils.CollectKeys(false, verifyKeys...)
+		pubKeyRing, err = utils.CollectKeys(false, verifyWith.Value()...)
 		if err != nil {
 			return decErr(err)
 		}
